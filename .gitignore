@@ -1,0 +1,37 @@
+# Environnement
+.env
+.env.local
+*.env.local
+
+# Dépendances
+node_modules/
+**/node_modules/
+
+# Build
+dist/
+build/
+**/dist/
+**/build/
+
+# Base de données
+*.db
+*.sqlite
+postgres-data/
+
+# Certificats
+nginx/certs/*.pem
+nginx/certs/*.key
+nginx/certs/*.crt
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Prisma
+**/prisma/migrations/dev.db*
