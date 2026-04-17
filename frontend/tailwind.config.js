@@ -4,12 +4,19 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg: '#0f172a',
-        surface: '#1e293b',
-        border: '#334155',
-        text: '#e2e8f0',
-        muted: '#94a3b8',
-        accent: '#6366f1',
+        bg: '#0a0a0f',
+        surface: '#14141f',
+        border: '#2a2a3a',
+        text: '#e8e8e8',
+        muted: '#6a7a6a',
+        accent: '#39ff14',
+        'accent-cyan': '#00f0ff',
+        'accent-magenta': '#ff2e63',
+        danger: '#ff2e63',
+      },
+      fontFamily: {
+        display: ['"Press Start 2P"', 'monospace'],
+        body: ['VT323', 'Courier New', 'monospace'],
       },
     },
   },

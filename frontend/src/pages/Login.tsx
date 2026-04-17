@@ -44,41 +44,61 @@ export function Login() {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-12">
-      <h1 className="text-2xl font-bold mb-6">{t('auth.loginTitle')}</h1>
-      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-        <div>
-          <label className="block text-sm mb-1" htmlFor="email">{t('auth.email')}</label>
-          <input
-            id="email" type="email" value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-surface border border-border rounded-md px-3 py-2 focus:outline-none focus:border-accent"
-            autoComplete="email"
-          />
-          {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
-        </div>
-        <div>
-          <label className="block text-sm mb-1" htmlFor="password">{t('auth.password')}</label>
-          <input
-            id="password" type="password" value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-surface border border-border rounded-md px-3 py-2 focus:outline-none focus:border-accent"
-            autoComplete="current-password"
-          />
-          {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
-        </div>
-        {errors.form && <p className="text-red-400 text-sm">{errors.form}</p>}
-        <button
-          type="submit" disabled={submitting}
-          className="w-full bg-accent hover:opacity-90 disabled:opacity-50 rounded-md py-2 font-medium"
-        >
-          {submitting ? t('auth.loginSubmitting') : t('auth.loginSubmit')}
-        </button>
-      </form>
-      <p className="text-muted text-sm mt-4">
-        {t('auth.noAccount')}{' '}
-        <Link to="/register" className="text-accent hover:underline">{t('auth.registerLink')}</Link>
-      </p>
+    <div className="max-w-lg mx-auto px-4 py-16">
+      <div className="arcade-panel">
+        <h1 className="font-display text-xl neon text-accent mb-2">
+          &gt; {t('auth.loginTitle')}
+        </h1>
+        <p className="font-body text-base text-muted mb-8">
+          AUTHENTICATION REQUIRED<span className="cursor-blink"></span>
+        </p>
+
+        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+          <div>
+            <label className="block font-display text-xs text-accent-cyan mb-2" htmlFor="email">
+              {t('auth.email').toUpperCase()}
+            </label>
+            <input
+              id="email" type="email" value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="input-arcade"
+              autoComplete="email"
+            />
+            {errors.email && (
+              <p className="text-danger font-body text-base mt-1">&gt; ERR: {errors.email}</p>
+            )}
+          </div>
+          <div>
+            <label className="block font-display text-xs text-accent-cyan mb-2" htmlFor="password">
+              {t('auth.password').toUpperCase()}
+            </label>
+            <input
+              id="password" type="password" value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="input-arcade"
+              autoComplete="current-password"
+            />
+            {errors.password && (
+              <p className="text-danger font-body text-base mt-1">&gt; ERR: {errors.password}</p>
+            )}
+          </div>
+
+          {errors.form && (
+            <p className="text-danger font-body text-lg">&gt; {errors.form}</p>
+          )}
+
+          <button type="submit" disabled={submitting} className="btn-arcade-primary w-full">
+            {submitting ? `> ${t('auth.loginSubmitting')}` : `> ${t('auth.loginSubmit')}`}
+          </button>
+        </form>
+
+        <p className="font-body text-base text-muted mt-6 text-center">
+          {t('auth.noAccount')}{' '}
+          <Link to="/register" className="arcade-link">
+            {t('auth.registerLink')}
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }

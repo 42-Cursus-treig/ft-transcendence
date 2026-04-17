@@ -5,23 +5,42 @@ export function Profile() {
   const { user } = useAuth();
   const { t } = useTranslation();
   if (!user) return null;
+
   return (
-    <div className="max-w-5xl mx-auto px-4 py-12">
-      <h1 className="text-2xl font-bold mb-6">{t('profile.title')}</h1>
-      <dl className="space-y-3">
-        <div className="flex gap-3">
-          <dt className="text-muted w-32">{t('profile.username')}</dt>
-          <dd>{user.username}</dd>
+    <div className="max-w-3xl mx-auto px-4 py-16">
+      <h1 className="font-display text-2xl neon text-accent mb-2">
+        &gt; PLAYER CARD
+      </h1>
+      <p className="font-body text-base text-muted mb-8">
+        {t('profile.title').toUpperCase()}<span className="cursor-blink"></span>
+      </p>
+
+      <div className="arcade-panel font-body text-xl space-y-4">
+        <div className="flex gap-4">
+          <span className="text-accent-cyan w-48 uppercase font-display text-xs pt-1">
+            {t('profile.username')}
+          </span>
+          <span className="text-text">{user.username}</span>
         </div>
-        <div className="flex gap-3">
-          <dt className="text-muted w-32">{t('profile.email')}</dt>
-          <dd>{user.email}</dd>
+        <div className="flex gap-4">
+          <span className="text-accent-cyan w-48 uppercase font-display text-xs pt-1">
+            {t('profile.email')}
+          </span>
+          <span className="text-text">{user.email}</span>
         </div>
-        <div className="flex gap-3">
-          <dt className="text-muted w-32">{t('profile.userId')}</dt>
-          <dd className="font-mono text-sm">{user.id}</dd>
+        <div className="flex gap-4">
+          <span className="text-accent-cyan w-48 uppercase font-display text-xs pt-1">
+            {t('profile.userId')}
+          </span>
+          <span className="text-muted text-sm break-all">{user.id}</span>
         </div>
-      </dl>
+
+        <div className="border-t-2 border-border pt-4 mt-6">
+          <p className="text-muted text-base">
+            &gt; STATS: <span className="text-accent-cyan">COMING_SOON.EXE</span>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

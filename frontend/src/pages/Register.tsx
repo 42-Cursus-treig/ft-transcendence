@@ -45,52 +45,76 @@ export function Register() {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-12">
-      <h1 className="text-2xl font-bold mb-6">{t('auth.registerTitle')}</h1>
-      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-        <div>
-          <label className="block text-sm mb-1" htmlFor="email">{t('auth.email')}</label>
-          <input
-            id="email" type="email" value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-surface border border-border rounded-md px-3 py-2 focus:outline-none focus:border-accent"
-            autoComplete="email"
-          />
-          {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
-        </div>
-        <div>
-          <label className="block text-sm mb-1" htmlFor="username">{t('auth.username')}</label>
-          <input
-            id="username" type="text" value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full bg-surface border border-border rounded-md px-3 py-2 focus:outline-none focus:border-accent"
-            autoComplete="username"
-          />
-          {errors.username && <p className="text-red-400 text-sm mt-1">{errors.username}</p>}
-        </div>
-        <div>
-          <label className="block text-sm mb-1" htmlFor="password">{t('auth.password')}</label>
-          <input
-            id="password" type="password" value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-surface border border-border rounded-md px-3 py-2 focus:outline-none focus:border-accent"
-            autoComplete="new-password"
-          />
-          {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
-          <p className="text-muted text-xs mt-1">{t('auth.passwordHint')}</p>
-        </div>
-        {errors.form && <p className="text-red-400 text-sm">{errors.form}</p>}
-        <button
-          type="submit" disabled={submitting}
-          className="w-full bg-accent hover:opacity-90 disabled:opacity-50 rounded-md py-2 font-medium"
-        >
-          {submitting ? t('auth.registerSubmitting') : t('auth.registerSubmit')}
-        </button>
-      </form>
-      <p className="text-muted text-sm mt-4">
-        {t('auth.hasAccount')}{' '}
-        <Link to="/login" className="text-accent hover:underline">{t('auth.loginLink')}</Link>
-      </p>
+    <div className="max-w-lg mx-auto px-4 py-16">
+      <div className="arcade-panel">
+        <h1 className="font-display text-xl neon text-accent mb-2">
+          &gt; {t('auth.registerTitle')}
+        </h1>
+        <p className="font-body text-base text-muted mb-8">
+          NEW PLAYER REGISTRATION<span className="cursor-blink"></span>
+        </p>
+
+        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+          <div>
+            <label className="block font-display text-xs text-accent-cyan mb-2" htmlFor="email">
+              {t('auth.email').toUpperCase()}
+            </label>
+            <input
+              id="email" type="email" value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="input-arcade"
+              autoComplete="email"
+            />
+            {errors.email && (
+              <p className="text-danger font-body text-base mt-1">&gt; ERR: {errors.email}</p>
+            )}
+          </div>
+          <div>
+            <label className="block font-display text-xs text-accent-cyan mb-2" htmlFor="username">
+              {t('auth.username').toUpperCase()}
+            </label>
+            <input
+              id="username" type="text" value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="input-arcade"
+              autoComplete="username"
+            />
+            {errors.username && (
+              <p className="text-danger font-body text-base mt-1">&gt; ERR: {errors.username}</p>
+            )}
+          </div>
+          <div>
+            <label className="block font-display text-xs text-accent-cyan mb-2" htmlFor="password">
+              {t('auth.password').toUpperCase()}
+            </label>
+            <input
+              id="password" type="password" value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="input-arcade"
+              autoComplete="new-password"
+            />
+            {errors.password && (
+              <p className="text-danger font-body text-base mt-1">&gt; ERR: {errors.password}</p>
+            )}
+            <p className="font-body text-sm text-muted mt-1">// {t('auth.passwordHint')}</p>
+          </div>
+
+          {errors.form && (
+            <p className="text-danger font-body text-lg">&gt; {errors.form}</p>
+          )}
+
+          <button type="submit" disabled={submitting} className="btn-arcade-primary w-full">
+            {submitting ? `> ${t('auth.registerSubmitting')}` : `> ${t('auth.registerSubmit')}`}
+          </button>
+        </form>
+
+        <p className="font-body text-base text-muted mt-6 text-center">
+          {t('auth.hasAccount')}{' '}
+          <Link to="/login" className="arcade-link">
+            {t('auth.loginLink')}
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }

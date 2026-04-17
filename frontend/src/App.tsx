@@ -12,7 +12,16 @@ import { useTranslation } from 'react-i18next';
 
 function NotFound() {
   const { t } = useTranslation();
-  return <div className="p-12 text-center text-muted">{t('common.notFound')}</div>;
+  return (
+    <div className="max-w-2xl mx-auto px-4 py-24 text-center">
+      <p className="font-display text-5xl md:text-7xl neon text-danger mb-6">
+        404
+      </p>
+      <p className="font-body text-2xl text-muted">
+        &gt; {t('common.notFound')}<span className="cursor-blink"></span>
+      </p>
+    </div>
+  );
 }
 
 export function App() {
