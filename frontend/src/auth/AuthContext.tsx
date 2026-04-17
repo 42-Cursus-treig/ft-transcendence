@@ -23,6 +23,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
+
+    const hasSession = document.cookie.split('; ').some(c => c.startsWith('has_session='));
+    if (!hasSession) {
+      setLoading(false);
+      return;
+    }
+
     api
       .get<{ user: User }>('/auth/me')
       .then((data) => {

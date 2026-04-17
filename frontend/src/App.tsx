@@ -8,6 +8,7 @@ import { Register } from './pages/Register';
 import { Profile } from './pages/Profile';
 import { Privacy } from './pages/Privacy';
 import { Terms } from './pages/Terms';
+import { Play } from './pages/Play';
 import { useTranslation } from 'react-i18next';
 
 function NotFound() {
@@ -34,23 +35,17 @@ export function App() {
     >
       <AuthProvider>
         <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
-        </Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/play" element={<ProtectedRoute><Play /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+      </Routes>
       </AuthProvider>
     </BrowserRouter>
   );

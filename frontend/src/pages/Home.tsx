@@ -43,16 +43,22 @@ export function Home() {
         </div>
       </div>
 
-      {!user && (
-        <div className="flex flex-wrap gap-4 justify-center">
-          <Link to="/register" className="btn-arcade-primary">
-            &gt; {t('common.register')}
+      <div className="flex flex-wrap gap-4 justify-center">
+        {user ? (
+          <Link to="/play" className="btn-arcade-primary">
+            &gt; PLAY
           </Link>
-          <Link to="/login" className="btn-arcade-primary">
-            &gt; {t('common.login')}
-          </Link>
-        </div>
-      )}
+        ) : (
+          <>
+            <Link to="/register" className="btn-arcade-primary">
+              &gt; {t('common.register')}
+            </Link>
+            <Link to="/login" className="btn-arcade-primary">
+              &gt; {t('common.login')}
+            </Link>
+          </>
+        )}
+      </div>
     </div>
   );
 }

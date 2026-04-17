@@ -84,6 +84,14 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
       expires: session.expiresAt,
     });
 
+    reply.setCookie('has_session', '1', {
+      httpOnly: false,
+      secure: true,
+      sameSite: 'strict',
+      path: '/',
+      expires: session.expiresAt,
+    });
+
     return reply.send({
       user: {
         id: user.id,
@@ -101,6 +109,7 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
         .catch(() => undefined);
     }
     reply.clearCookie(SESSION_COOKIE_NAME, { path: '/' });
+    reply.clearCookie('has_session', { path: '/' });
     return reply.send({ success: true });
   });
 
