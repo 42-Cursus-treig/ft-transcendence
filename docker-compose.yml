@@ -38,6 +38,20 @@ services:
       - transcendence_net
     restart: unless-stopped
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: transcendence_frontend
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/index.html:/app/index.html
+      - /app/node_modules
+    networks:
+      - transcendence_net
+    restart: unless-stopped
+
   nginx:
     build:
       context: ./nginx
@@ -48,9 +62,9 @@ services:
       - "${HTTPS_PORT:-443}:443"
     volumes:
       - ./nginx/certs:/etc/nginx/certs:ro
-      - ./nginx/html:/usr/share/nginx/html:ro
     depends_on:
       - backend
+      - frontend
     networks:
       - transcendence_net
     restart: unless-stopped
