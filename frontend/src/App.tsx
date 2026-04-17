@@ -8,7 +8,8 @@ import { Register } from './pages/Register';
 import { Profile } from './pages/Profile';
 import { Privacy } from './pages/Privacy';
 import { Terms } from './pages/Terms';
-import { Play } from './pages/Play';
+import { PlaySetup } from './pages/PlaySetup';
+import { PongMatch } from './pages/PongMatch';
 import { useTranslation } from 'react-i18next';
 
 function NotFound() {
@@ -39,7 +40,8 @@ export function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/play" element={<ProtectedRoute><Play /></ProtectedRoute>} />
+          <Route path="/play" element={<ProtectedRoute><PlaySetup /></ProtectedRoute>} />
+          <Route path="/play/match" element={<ProtectedRoute><PongMatch /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />

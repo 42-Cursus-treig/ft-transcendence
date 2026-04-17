@@ -3,13 +3,41 @@ import { GAME_WIDTH, GAME_HEIGHT } from './constants';
 import { createInitialState, updateGame, handleSpacePressed } from './engine';
 import { render } from './renderer';
 import { useKeyboardInput } from './useKeyboardInput';
+import type { GameState } from './types';
 
-export function usePongGame(canvasRef: React.RefObject<HTMLCanvasElement>) {
+type UsePongGameOptions = {
+  onMatchEnd?: (finalState: GameState, startedAt: Date, endedAt: Date) => void;
+  aliases?: { left: string; right: string };
+};
+
+export function usePongGame(
+  canvasRef: React.RefObject<HTMLCanvasElement>,
+  options: UsePongGameOptions = {},
+) {
   const stateRef = useRef(createInitialState());
+  const matchStartRef = useRef<Date | null>(null);
+  const matchEndedFiredRef = useRef(false);
+
+  const onMatchEndRef = useRef(options.onMatchEnd);
+  onMatchEndRef.current = options.onMatchEnd;
+
+  const aliasesRef = useRef(options.aliases);
+  aliasesRef.current = options.aliases;
 
   const inputRef = useKeyboardInput({
     onSpace: () => {
-      stateRef.current = handleSpacePressed(stateRef.current);
+      const prev = stateRef.current;
+      const next = handleSpacePressed(prev);
+      stateRef.current = next;
+
+      if (prev.status === 'idle' && next.status === 'playing') {
+        matchStartRef.current = new Date();
+        matchEndedFiredRef.current = false;
+      }
+
+      if (prev.status === 'finished' && next.status === 'idle') {
+        matchStartRef.current = null;
+      }
     },
   });
 
@@ -30,15 +58,26 @@ export function usePongGame(canvasRef: React.RefObject<HTMLCanvasElement>) {
       const dt = Math.min((now - lastTime) / 1000, 0.05);
       lastTime = now;
 
-      stateRef.current = updateGame(stateRef.current, inputRef.current, dt);
-      render(ctx, stateRef.current);
+      const prev = stateRef.current;
+      const next = updateGame(prev, inputRef.current, dt);
+      stateRef.current = next;
+
+      if (
+        prev.status === 'playing' &&
+        next.status === 'finished' &&
+        !matchEndedFiredRef.current &&
+        matchStartRef.current
+      ) {
+        matchEndedFiredRef.current = true;
+        onMatchEndRef.current?.(next, matchStartRef.current, new Date());
+      }
+
+      render(ctx, next, options.aliases);
+      render(ctx, next, aliasesRef.current);
       animationFrameId = requestAnimationFrame(loop);
     };
 
     animationFrameId = requestAnimationFrame(loop);
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-    };
+    return () => cancelAnimationFrame(animationFrameId);
   }, [canvasRef, inputRef]);
 }

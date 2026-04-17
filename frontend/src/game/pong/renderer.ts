@@ -1,13 +1,17 @@
 import { GAME_WIDTH, GAME_HEIGHT, COLORS } from './constants';
 import type { GameState } from './types';
 
-export function render(ctx: CanvasRenderingContext2D, state: GameState): void {
+export function render(
+  ctx: CanvasRenderingContext2D,
+  state: GameState,
+  aliases?: { left: string, right: string }
+): void {
   ctx.fillStyle = COLORS.bg;
   ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
   drawCenterNet(ctx);
 
-  drawScore(ctx, state.score.left, state.score.right);
+  drawScore(ctx, state.score.left, state.score.right, aliases);
 
   drawPaddle(ctx, state.leftPaddle.x, state.leftPaddle.y, state.leftPaddle.width, state.leftPaddle.height);
   drawPaddle(ctx, state.rightPaddle.x, state.rightPaddle.y, state.rightPaddle.width, state.rightPaddle.height);
@@ -21,9 +25,11 @@ export function render(ctx: CanvasRenderingContext2D, state: GameState): void {
   } else if (state.status === 'paused') {
     drawOverlay(ctx, 'PAUSED');
   } else if (state.status === 'finished' && state.winner) {
-    const winnerText = state.winner === 'left' ? 'LEFT PLAYER WINS' : 'RIGHT PLAYER WINS';
-    drawOverlay(ctx, winnerText, 'PRESS SPACE TO PLAY AGAIN');
-  }
+    const winnerName = aliases
+      ? (state.winner === 'left' ? aliases.left : aliases.right)
+      : (state.winner === 'left' ? 'LEFT PLAYER' : 'RIGHT PLAYER');
+    drawOverlay(ctx, `${winnerName.toUpperCase()} WINS`, 'PRESS SPACE TO PLAY AGAIN');
+  } 
 }
 
 function drawCenterNet(ctx: CanvasRenderingContext2D): void {
@@ -53,15 +59,35 @@ function drawBall(ctx: CanvasRenderingContext2D, x: number, y: number, size: num
   ctx.shadowBlur = 0;
 }
 
-function drawScore(ctx: CanvasRenderingContext2D, left: number, right: number): void {
+function drawScore(
+  ctx: CanvasRenderingContext2D,
+  left: number,
+  right: number,
+  aliases?: { left: string; right: string },
+): void {
   ctx.fillStyle = COLORS.fg;
-  ctx.font = 'bold 60px "Press Start 2P", monospace';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
   ctx.shadowColor = COLORS.glow;
   ctx.shadowBlur = 10;
-  ctx.fillText(String(left), GAME_WIDTH / 4, 40);
-  ctx.fillText(String(right), (GAME_WIDTH * 3) / 4, 40);
+
+  if (aliases) {
+    ctx.font = 'bold 14px "Press Start 2P", monospace';
+    ctx.fillText(
+      aliases.left.toUpperCase().slice(0, 12),
+      GAME_WIDTH / 4,
+      20,
+    );
+    ctx.fillText(
+      aliases.right.toUpperCase().slice(0, 12),
+      (GAME_WIDTH * 3) / 4,
+      20,
+    );
+  }
+
+  ctx.font = 'bold 60px "Press Start 2P", monospace';
+  ctx.fillText(String(left), GAME_WIDTH / 4, 50);
+  ctx.fillText(String(right), (GAME_WIDTH * 3) / 4, 50);
   ctx.shadowBlur = 0;
 }
 
