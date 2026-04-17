@@ -1,8 +1,11 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
+import cookie from '@fastify/cookie';
 import { PrismaClient } from '@prisma/client';
 import { healthRoutes } from './routes/health.js';
+import { authRoutes } from './routes/auth.js';
+import authPlugin from './plugins/auth.js';
 
 const prisma = new PrismaClient();
 
@@ -21,9 +24,16 @@ await app.register(cors, {
   credentials: true,
 });
 
+await app.register(cookie, {
+  secret: process.env.JWT_SECRET,
+});
+
 app.decorate('prisma', prisma);
 
+await app.register(authPlugin);
+
 await app.register(healthRoutes, { prefix: '/api' });
+await app.register(authRoutes, { prefix: '/api' });
 
 const shutdown = async (signal: string) => {
   app.log.info(`Received ${signal}, shutting down gracefully...`);
