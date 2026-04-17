@@ -1,8 +1,8 @@
-import { useTranslation } from 'react-i18next';
 import { PongCanvas } from '../game/pong/PongCanvas';
+import { useKeyLabels } from '../game/pong/useKeyLabels';
 
 export function Play() {
-  const { t } = useTranslation();
+  const keys = useKeyLabels();
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-12">
@@ -16,23 +16,61 @@ export function Play() {
       <PongCanvas />
 
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-        <div className="arcade-panel text-center">
-          <p className="font-display text-xs text-accent-cyan mb-3">LEFT PLAYER</p>
-          <p className="font-body text-xl">
-            <span className="text-accent">W</span> / <span className="text-accent">S</span>
-          </p>
-        </div>
-        <div className="arcade-panel text-center">
-          <p className="font-display text-xs text-accent-cyan mb-3">RIGHT PLAYER</p>
-          <p className="font-body text-xl">
-            <span className="text-accent">↑</span> / <span className="text-accent">↓</span>
-          </p>
-        </div>
+        <ControlsCard
+          label="LEFT PLAYER"
+          upKey={keys.leftUp}
+          downKey={keys.leftDown}
+        />
+        <ControlsCard
+          label="RIGHT PLAYER"
+          upKey={keys.rightUp}
+          downKey={keys.rightDown}
+        />
       </div>
 
       <p className="font-body text-base text-muted text-center mt-6">
-        &gt; FIRST TO 5 POINTS WINS<span className="cursor-blink"></span>
+        &gt; SPACE = START / PAUSE &nbsp;·&nbsp; FIRST TO 5 WINS
+        <span className="cursor-blink"></span>
       </p>
     </div>
+  );
+}
+
+function ControlsCard({
+  label,
+  upKey,
+  downKey,
+}: {
+  label: string;
+  upKey: string;
+  downKey: string;
+}) {
+  return (
+    <div className="arcade-panel text-center">
+      <p className="font-display text-xs text-accent-cyan mb-4">{label}</p>
+      <div className="flex flex-col items-center gap-2">
+        <KeyCap label={upKey} />
+        <KeyCap label={downKey} />
+      </div>
+    </div>
+  );
+}
+
+function KeyCap({ label }: { label: string }) {
+  return (
+    <span
+      className="inline-flex items-center justify-center border-2 border-accent text-accent font-display"
+      style={{
+        minWidth: '3rem',
+        height: '3rem',
+        padding: '0 0.75rem',
+        fontSize: label.length > 1 ? '0.75rem' : '1rem',
+        boxShadow:
+          '0 0 8px rgba(57, 255, 20, 0.4), inset 0 0 8px rgba(57, 255, 20, 0.15)',
+        lineHeight: 1,
+      }}
+    >
+      {label}
+    </span>
   );
 }
