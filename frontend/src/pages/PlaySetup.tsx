@@ -2,6 +2,10 @@ import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import type { AIDifficulty } from '../game/pong/ai';
+import {
+  DEFAULT_SETTINGS,
+  type GameSettings,
+} from '../game/pong/settings';
 
 type GameMode = 'LOCAL' | 'AI';
 
@@ -12,9 +16,17 @@ export function PlaySetup() {
   const [userSide, setUserSide] = useState<'LEFT' | 'RIGHT'>('LEFT');
   const [guestAlias, setGuestAlias] = useState('');
   const [aiDifficulty, setAIDifficulty] = useState<AIDifficulty>('NORMAL');
+  const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS);
   const [error, setError] = useState('');
 
   if (!user) return null;
+
+  const updateSettings = <K extends keyof GameSettings>(
+    key: K,
+    value: GameSettings[K],
+  ) => setSettings((s) => ({ ...s, [key]: value }));
+
+  const resetToDefault = () => setSettings(DEFAULT_SETTINGS);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -33,7 +45,7 @@ export function PlaySetup() {
       const leftAlias = userSide === 'LEFT' ? user.username : trimmed;
       const rightAlias = userSide === 'RIGHT' ? user.username : trimmed;
       navigate('/play/match', {
-        state: { mode: 'LOCAL', leftAlias, rightAlias, userSide },
+        state: { mode: 'LOCAL', leftAlias, rightAlias, userSide, settings },
       });
       return;
     }
@@ -45,6 +57,7 @@ export function PlaySetup() {
         rightAlias: `CPU-${aiDifficulty}`,
         userSide: 'LEFT',
         aiDifficulty,
+        settings,
       },
     });
   };
@@ -60,77 +73,34 @@ export function PlaySetup() {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-          <div>
-            <p className="font-display text-xs text-accent-cyan mb-3">MODE</p>
+          <SettingSection label="MODE">
             <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setMode('LOCAL')}
-                className={`btn-arcade ${
-                  mode === 'LOCAL'
-                    ? 'bg-accent text-bg border-accent'
-                    : 'bg-transparent text-accent border-accent'
-                }`}
-              >
+              <ToggleButton active={mode === 'LOCAL'} onClick={() => setMode('LOCAL')}>
                 LOCAL 1V1
-              </button>
-              <button
-                type="button"
-                onClick={() => setMode('AI')}
-                className={`btn-arcade ${
-                  mode === 'AI'
-                    ? 'bg-accent text-bg border-accent'
-                    : 'bg-transparent text-accent border-accent'
-                }`}
-              >
+              </ToggleButton>
+              <ToggleButton active={mode === 'AI'} onClick={() => setMode('AI')}>
                 VS CPU
-              </button>
+              </ToggleButton>
             </div>
-          </div>
+          </SettingSection>
 
           {mode === 'LOCAL' ? (
             <>
-              <div>
-                <p className="font-display text-xs text-accent-cyan mb-3">
-                  YOUR SIDE
-                </p>
+              <SettingSection label="YOUR SIDE">
                 <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setUserSide('LEFT')}
-                    className={`btn-arcade ${
-                      userSide === 'LEFT'
-                        ? 'bg-accent text-bg border-accent'
-                        : 'bg-transparent text-accent border-accent'
-                    }`}
-                  >
+                  <ToggleButton active={userSide === 'LEFT'} onClick={() => setUserSide('LEFT')}>
                     &lt; LEFT
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setUserSide('RIGHT')}
-                    className={`btn-arcade ${
-                      userSide === 'RIGHT'
-                        ? 'bg-accent text-bg border-accent'
-                        : 'bg-transparent text-accent border-accent'
-                    }`}
-                  >
+                  </ToggleButton>
+                  <ToggleButton active={userSide === 'RIGHT'} onClick={() => setUserSide('RIGHT')}>
                     RIGHT &gt;
-                  </button>
+                  </ToggleButton>
                 </div>
                 <p className="font-body text-sm text-muted mt-2">
-                  You are:{' '}
-                  <span className="text-accent">{user.username}</span>
+                  You are: <span className="text-accent">{user.username}</span>
                 </p>
-              </div>
+              </SettingSection>
 
-              <div>
-                <label
-                  className="block font-display text-xs text-accent-cyan mb-2"
-                  htmlFor="guestAlias"
-                >
-                  OPPONENT NAME
-                </label>
+              <SettingSection label="OPPONENT NAME">
                 <input
                   id="guestAlias"
                   type="text"
@@ -141,35 +111,116 @@ export function PlaySetup() {
                   className="input-arcade"
                   autoComplete="off"
                 />
-              </div>
+              </SettingSection>
             </>
           ) : (
-            <div>
-              <p className="font-display text-xs text-accent-cyan mb-3">
-                CPU DIFFICULTY
-              </p>
+            <SettingSection label="CPU DIFFICULTY">
               <div className="grid grid-cols-3 gap-2">
                 {(['EASY', 'NORMAL', 'HARD'] as const).map((d) => (
-                  <button
+                  <ToggleButton
                     key={d}
-                    type="button"
+                    active={aiDifficulty === d}
                     onClick={() => setAIDifficulty(d)}
-                    className={`btn-arcade ${
-                      aiDifficulty === d
-                        ? 'bg-accent text-bg border-accent'
-                        : 'bg-transparent text-accent border-accent'
-                    }`}
                   >
                     {d}
-                  </button>
+                  </ToggleButton>
                 ))}
               </div>
               <p className="font-body text-sm text-muted mt-2">
                 You play <span className="text-accent">LEFT</span>, CPU plays{' '}
                 <span className="text-accent">RIGHT</span>
               </p>
-            </div>
+            </SettingSection>
           )}
+
+          <div className="border-t-2 border-border pt-6 flex items-center justify-between">
+            <h2 className="font-display text-sm text-accent-cyan">
+              &gt; CUSTOMIZATION
+            </h2>
+            <button
+              type="button"
+              onClick={resetToDefault}
+              className="font-body text-sm text-muted hover:text-accent uppercase"
+            >
+              reset defaults
+            </button>
+          </div>
+
+          <SettingSection label="BALL SPEED">
+            <div className="grid grid-cols-3 gap-2">
+              {(['SLOW', 'NORMAL', 'FAST'] as const).map((v) => (
+                <ToggleButton
+                  key={v}
+                  active={settings.ballSpeed === v}
+                  onClick={() => updateSettings('ballSpeed', v)}
+                >
+                  {v}
+                </ToggleButton>
+              ))}
+            </div>
+          </SettingSection>
+
+          <SettingSection label="PADDLE SIZE">
+            <div className="grid grid-cols-3 gap-2">
+              {(['SMALL', 'NORMAL', 'LARGE'] as const).map((v) => (
+                <ToggleButton
+                  key={v}
+                  active={settings.paddleSize === v}
+                  onClick={() => updateSettings('paddleSize', v)}
+                >
+                  {v}
+                </ToggleButton>
+              ))}
+            </div>
+          </SettingSection>
+
+          <SettingSection label="SCORE TO WIN">
+            <div className="grid grid-cols-3 gap-2">
+              {([3, 5, 7] as const).map((v) => (
+                <ToggleButton
+                  key={v}
+                  active={settings.scoreToWin === v}
+                  onClick={() => updateSettings('scoreToWin', v)}
+                >
+                  {v} PTS
+                </ToggleButton>
+              ))}
+            </div>
+          </SettingSection>
+
+          <SettingSection label="THEME">
+            <div className="grid grid-cols-3 gap-2">
+              {(['CLASSIC', 'SYNTHWAVE', 'MONO'] as const).map((v) => (
+                <ToggleButton
+                  key={v}
+                  active={settings.theme === v}
+                  onClick={() => updateSettings('theme', v)}
+                >
+                  {v}
+                </ToggleButton>
+              ))}
+            </div>
+          </SettingSection>
+
+          <SettingSection label="POWER-UPS">
+            <div className="grid grid-cols-2 gap-3">
+              <ToggleButton
+                active={!settings.powerUpsEnabled}
+                onClick={() => updateSettings('powerUpsEnabled', false)}
+              >
+                OFF
+              </ToggleButton>
+              <ToggleButton
+                active={settings.powerUpsEnabled}
+                onClick={() => updateSettings('powerUpsEnabled', true)}
+              >
+                ON
+              </ToggleButton>
+            </div>
+            <p className="font-body text-sm text-muted mt-2">
+              // Hit power-ups with the ball to boost your paddle
+            </p>
+          </SettingSection>
 
           {error && (
             <p className="text-danger font-body text-base">
@@ -183,5 +234,38 @@ export function PlaySetup() {
         </form>
       </div>
     </div>
+  );
+}
+
+function SettingSection({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="font-display text-xs text-accent-cyan mb-3">{label}</p>
+      {children}
+    </div>
+  );
+}
+
+function ToggleButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`btn-arcade ${
+        active
+          ? 'bg-accent text-bg border-accent'
+          : 'bg-transparent text-accent border-accent'
+      }`}
+    >
+      {children}
+    </button>
   );
 }

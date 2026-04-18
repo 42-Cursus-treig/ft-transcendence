@@ -4,24 +4,21 @@ export const GAME_HEIGHT = 540;
 
 // Raquettes
 export const PADDLE_WIDTH = 12;
-export const PADDLE_HEIGHT = 90;
 export const PADDLE_MARGIN = 20;
 export const PADDLE_SPEED = 500;
 
 // Balle
 export const BALL_SIZE = 12;
+
+// Power-ups
+export const POWERUP_SIZE = 24;
+export const POWERUP_SPAWN_INTERVAL_MS = 8000;
+export const POWERUP_BIG_PADDLE_DURATION_MS = 8000;
+export const POWERUP_BIG_PADDLE_MULTIPLIER = 1.6;
+
+// Valeurs par défaut
 export const BALL_INITIAL_SPEED = 400;
 export const BALL_SPEED_INCREMENT = 30;
 export const BALL_MAX_SPEED = 900;
-
-// Règles
+export const PADDLE_HEIGHT = 90;
 export const SCORE_TO_WIN = 5;
-
-// Couleurs
-export const COLORS = {
-  bg: '#0a0a0f',
-  fg: '#39ff14',
-  net: '#39ff14',
-  text: '#e8e8e8',
-  glow: 'rgba(57, 255, 20, 0.6)',
-} as const;

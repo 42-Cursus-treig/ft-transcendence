@@ -5,6 +5,7 @@ import { useKeyLabels } from '../game/pong/useKeyLabels';
 import { matchApi } from '../api/matches';
 import type { GameState } from '../game/pong/types';
 import type { AIDifficulty } from '../game/pong/ai';
+import { DEFAULT_SETTINGS, type GameSettings } from '../game/pong/settings';
 
 type MatchSetupState =
   | {
@@ -12,6 +13,7 @@ type MatchSetupState =
       leftAlias: string;
       rightAlias: string;
       userSide: 'LEFT' | 'RIGHT';
+      settings?: GameSettings;
     }
   | {
       mode: 'AI';
@@ -19,6 +21,7 @@ type MatchSetupState =
       rightAlias: string;
       userSide: 'LEFT';
       aiDifficulty: AIDifficulty;
+      settings?: GameSettings;
     };
 
 export function PongMatch() {
@@ -27,10 +30,11 @@ export function PongMatch() {
   const keys = useKeyLabels();
 
   const setup = location.state as MatchSetupState | null;
-
   if (!setup) {
     return <Navigate to="/play" replace />;
   }
+
+  const settings = setup.settings ?? DEFAULT_SETTINGS;
 
   const handleMatchEnd = useCallback(
     async (finalState: GameState, startedAt: Date, endedAt: Date) => {
@@ -72,15 +76,20 @@ export function PongMatch() {
       <h1 className="font-display text-2xl neon text-accent mb-2 text-center">
         &gt; PONG
       </h1>
-      <p className="font-body text-base text-muted mb-8 text-center">
+      <p className="font-body text-base text-muted mb-2 text-center">
         {setup.leftAlias.toUpperCase()} VS {setup.rightAlias.toUpperCase()}
         <span className="cursor-blink"></span>
+      </p>
+      <p className="font-body text-sm text-muted text-center mb-8">
+        {settings.ballSpeed} BALL · {settings.paddleSize} PADDLES · FIRST TO {settings.scoreToWin}
+        {settings.powerUpsEnabled && ' · POWER-UPS'}
       </p>
 
       <PongCanvas
         onMatchEnd={handleMatchEnd}
         aliases={{ left: setup.leftAlias, right: setup.rightAlias }}
         aiDifficulty={isAIMode ? setup.aiDifficulty : undefined}
+        settings={settings}
       />
 
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
@@ -116,7 +125,7 @@ export function PongMatch() {
       </div>
 
       <p className="font-body text-base text-muted text-center mt-6">
-        &gt; SPACE = START / PAUSE &nbsp;·&nbsp; FIRST TO 5 WINS
+        &gt; SPACE = START / PAUSE &nbsp;·&nbsp; FIRST TO {settings.scoreToWin} WINS
         <span className="cursor-blink"></span>
       </p>
 
@@ -141,8 +150,7 @@ function KeyCap({ label }: { label: string }) {
         height: '3rem',
         padding: '0 0.75rem',
         fontSize: label.length > 1 ? '0.75rem' : '1rem',
-        boxShadow:
-          '0 0 8px rgba(57, 255, 20, 0.4), inset 0 0 8px rgba(57, 255, 20, 0.15)',
+        boxShadow: '0 0 8px rgba(57, 255, 20, 0.4), inset 0 0 8px rgba(57, 255, 20, 0.15)',
         lineHeight: 1,
       }}
     >
