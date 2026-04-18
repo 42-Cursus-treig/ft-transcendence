@@ -27,6 +27,9 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       NODE_ENV: ${NODE_ENV}
       PORT: ${BACKEND_PORT}
+      OAUTH_42_CLIENT_ID: ${OAUTH_42_CLIENT_ID}
+      OAUTH_42_CLIENT_SECRET: ${OAUTH_42_CLIENT_SECRET}
+      OAUTH_42_REDIRECT_URI: ${OAUTH_42_REDIRECT_URI}
     volumes:
       - ./backend/src:/app/src
       - ./backend/prisma:/app/prisma

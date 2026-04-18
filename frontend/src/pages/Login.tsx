@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthContext';
 import { loginSchema } from '../utils/validation';
 import { ApiException } from '../api/client';
+import { useSearchParams } from 'react-router-dom';
 
 export function Login() {
   const { login } = useAuth();
@@ -13,6 +14,16 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [searchParams] = useSearchParams();
+  const oauthError = searchParams.get('oauth_error');
+
+  const oauthErrorMessage = oauthError === 'denied'
+    ? 'You denied access on 42.'
+    : oauthError === 'state_mismatch'
+    ? 'Security check failed, please retry.'
+    : oauthError === 'server_error'
+    ? 'OAuth server error, please retry.'
+    : null;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -91,6 +102,25 @@ export function Login() {
             {submitting ? `> ${t('auth.loginSubmitting')}` : `> ${t('auth.loginSubmit')}`}
           </button>
         </form>
+
+        <div className="flex items-center gap-3 my-6">
+          <div className="flex-1 border-t border-border"></div>
+          <span className="font-body text-sm text-muted">OR</span>
+          <div className="flex-1 border-t border-border"></div>
+        </div>
+
+        <a
+          href="/api/auth/oauth/42/start"
+          className="btn-arcade-primary w-full block text-center"
+        >
+          &gt; SIGN IN WITH 42
+        </a>
+
+        {oauthErrorMessage && (
+          <p className="text-danger font-body text-base mb-4">
+            &gt; OAUTH: {oauthErrorMessage}
+          </p>
+        )}
 
         <p className="font-body text-base text-muted mt-6 text-center">
           {t('auth.noAccount')}{' '}

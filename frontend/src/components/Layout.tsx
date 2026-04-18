@@ -16,8 +16,15 @@ export function Layout() {
           <nav className="flex items-center gap-6 font-body text-lg">
             {user ? (
               <>
-                <Link to="/profile" className="text-accent-cyan hover:text-accent neon-cyan">
-                  [ {user.username} ]
+                <Link to="/profile" className="hover:text-accent flex items-center gap-2">
+                  {user.avatarUrl && (
+                    <img
+                      src={user.avatarUrl}
+                      alt=""
+                      className="w-8 h-8 rounded-full border border-accent"
+                    />
+                  )}
+                  <span>{user.username}</span>
                 </Link>
                 <button onClick={logout} className="text-muted hover:text-danger uppercase">
                   {t('common.logout')}

@@ -6,6 +6,7 @@ import { PrismaClient } from '@prisma/client';
 import { healthRoutes } from './routes/health.js';
 import { authRoutes } from './routes/auth.js';
 import { matchRoutes } from './routes/matches.js';
+import { oauthRoutes } from './routes/oauth.js';
 import authPlugin from './plugins/auth.js';
 
 const prisma = new PrismaClient();
@@ -36,6 +37,7 @@ await app.register(authPlugin);
 await app.register(healthRoutes, { prefix: '/api' });
 await app.register(authRoutes, { prefix: '/api' });
 await app.register(matchRoutes, { prefix: '/api' });
+await app.register(oauthRoutes, { prefix: '/api' });
 
 const shutdown = async (signal: string) => {
   app.log.info(`Received ${signal}, shutting down gracefully...`);

@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -8,17 +9,33 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(uuid())
-  email        String    @unique
-  username     String    @unique
-  passwordHash String
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id             String     @id @default(uuid())
+  email          String     @unique
+  username       String     @unique
+  passwordHash   String?
+  avatarUrl      String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
-  sessions     Session[]
-  matches      MatchParticipant[]
+  sessions       Session[]
+  matches        MatchParticipant[]
+  oauthAccounts  OAuthAccount[]
 
   @@map("users")
+}
+
+model OAuthAccount {
+  id              String   @id @default(uuid())
+  userId          String
+  provider        String
+  providerUserId  String
+  createdAt       DateTime @default(now())
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+  @@map("oauth_accounts")
 }
 
 model Session {

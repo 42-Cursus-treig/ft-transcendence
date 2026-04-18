@@ -53,7 +53,7 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
 
     const genericError = { error: 'Invalid email or password' };
 
-    if (!user) {
+    if (!user || !user.passwordHash) {
       await argon2.verify(
         '$argon2id$v=19$m=65536,t=3,p=4$abcdefghijklmnop$' +
         'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqr',
@@ -97,6 +97,7 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
         id: user.id,
         email: user.email,
         username: user.username,
+        avatarUrl: user.avatarUrl,
       },
     });
   });
@@ -117,7 +118,11 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
     '/auth/me',
     { preHandler: [app.requireAuth] },
     async (request) => {
-      return { user: request.user };
-    }
+      const fullUser = await app.prisma.user.findUnique({
+        where: { id: request.user!.id },
+        select: { id: true, email: true, username: true, avatarUrl: true },
+      });
+      return { user: fullUser };
+    },
   );
 };
