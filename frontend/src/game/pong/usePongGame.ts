@@ -3,11 +3,13 @@ import { GAME_WIDTH, GAME_HEIGHT } from './constants';
 import { createInitialState, updateGame, handleSpacePressed } from './engine';
 import { render } from './renderer';
 import { useKeyboardInput } from './useKeyboardInput';
-import type { GameState } from './types';
+import { createAIState, updateAI, type AIDifficulty } from './ai';
+import type { GameState, Input } from './types';
 
 type UsePongGameOptions = {
   onMatchEnd?: (finalState: GameState, startedAt: Date, endedAt: Date) => void;
   aliases?: { left: string; right: string };
+  aiDifficulty?: AIDifficulty;
 };
 
 export function usePongGame(
@@ -17,6 +19,7 @@ export function usePongGame(
   const stateRef = useRef(createInitialState());
   const matchStartRef = useRef<Date | null>(null);
   const matchEndedFiredRef = useRef(false);
+  const aiStateRef = useRef(createAIState(GAME_HEIGHT / 2));
 
   const onMatchEndRef = useRef(options.onMatchEnd);
   onMatchEndRef.current = options.onMatchEnd;
@@ -24,7 +27,10 @@ export function usePongGame(
   const aliasesRef = useRef(options.aliases);
   aliasesRef.current = options.aliases;
 
-  const inputRef = useKeyboardInput({
+  const aiDifficultyRef = useRef(options.aiDifficulty);
+  aiDifficultyRef.current = options.aiDifficulty;
+
+  const keyboardInputRef = useKeyboardInput({
     onSpace: () => {
       const prev = stateRef.current;
       const next = handleSpacePressed(prev);
@@ -33,8 +39,8 @@ export function usePongGame(
       if (prev.status === 'idle' && next.status === 'playing') {
         matchStartRef.current = new Date();
         matchEndedFiredRef.current = false;
+        aiStateRef.current = createAIState(GAME_HEIGHT / 2);
       }
-
       if (prev.status === 'finished' && next.status === 'idle') {
         matchStartRef.current = null;
       }
@@ -58,8 +64,23 @@ export function usePongGame(
       const dt = Math.min((now - lastTime) / 1000, 0.05);
       lastTime = now;
 
+      let effectiveInput: Input = { ...keyboardInputRef.current };
+
+      const difficulty = aiDifficultyRef.current;
+      if (difficulty && stateRef.current.status === 'playing') {
+        const { nextAIState, input: aiInput } = updateAI(
+          stateRef.current,
+          aiStateRef.current,
+          difficulty,
+          now,
+        );
+        aiStateRef.current = nextAIState;
+        effectiveInput.rightUp = aiInput.rightUp;
+        effectiveInput.rightDown = aiInput.rightDown;
+      }
+
       const prev = stateRef.current;
-      const next = updateGame(prev, inputRef.current, dt);
+      const next = updateGame(prev, effectiveInput, dt);
       stateRef.current = next;
 
       if (
@@ -72,12 +93,11 @@ export function usePongGame(
         onMatchEndRef.current?.(next, matchStartRef.current, new Date());
       }
 
-      render(ctx, next, options.aliases);
       render(ctx, next, aliasesRef.current);
       animationFrameId = requestAnimationFrame(loop);
     };
 
     animationFrameId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [canvasRef, inputRef]);
+  }, [canvasRef, keyboardInputRef]);
 }

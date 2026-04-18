@@ -4,12 +4,22 @@ import { PongCanvas } from '../game/pong/PongCanvas';
 import { useKeyLabels } from '../game/pong/useKeyLabels';
 import { matchApi } from '../api/matches';
 import type { GameState } from '../game/pong/types';
+import type { AIDifficulty } from '../game/pong/ai';
 
-type MatchSetupState = {
-  leftAlias: string;
-  rightAlias: string;
-  userSide: 'LEFT' | 'RIGHT';
-};
+type MatchSetupState =
+  | {
+      mode: 'LOCAL';
+      leftAlias: string;
+      rightAlias: string;
+      userSide: 'LEFT' | 'RIGHT';
+    }
+  | {
+      mode: 'AI';
+      leftAlias: string;
+      rightAlias: string;
+      userSide: 'LEFT';
+      aiDifficulty: AIDifficulty;
+    };
 
 export function PongMatch() {
   const location = useLocation();
@@ -28,7 +38,7 @@ export function PongMatch() {
 
       try {
         await matchApi.create({
-          mode: 'LOCAL',
+          mode: setup.mode,
           winnerSide: finalState.winner === 'left' ? 'LEFT' : 'RIGHT',
           startedAt: startedAt.toISOString(),
           endedAt: endedAt.toISOString(),
@@ -43,7 +53,8 @@ export function PongMatch() {
               alias: setup.rightAlias,
               side: 'RIGHT',
               score: finalState.score.right,
-              isCurrentUser: setup.userSide === 'RIGHT',
+              isCurrentUser:
+                setup.mode === 'LOCAL' && setup.userSide === 'RIGHT',
             },
           ],
         });
@@ -51,8 +62,10 @@ export function PongMatch() {
         console.error('Failed to save match:', err);
       }
     },
-    [setup.leftAlias, setup.rightAlias, setup.userSide],
+    [setup],
   );
+
+  const isAIMode = setup.mode === 'AI';
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-12">
@@ -67,6 +80,7 @@ export function PongMatch() {
       <PongCanvas
         onMatchEnd={handleMatchEnd}
         aliases={{ left: setup.leftAlias, right: setup.rightAlias }}
+        aiDifficulty={isAIMode ? setup.aiDifficulty : undefined}
       />
 
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
@@ -83,10 +97,21 @@ export function PongMatch() {
           <p className="font-display text-xs text-accent-cyan mb-4">
             {setup.rightAlias.toUpperCase()} (RIGHT)
           </p>
-          <div className="flex flex-col items-center gap-2">
-            <KeyCap label={keys.rightUp} />
-            <KeyCap label={keys.rightDown} />
-          </div>
+          {isAIMode ? (
+            <div className="py-4">
+              <p className="font-body text-lg text-accent-cyan">
+                &gt; AI CONTROLLED
+              </p>
+              <p className="font-body text-sm text-muted mt-1">
+                Difficulty: {setup.aiDifficulty}
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              <KeyCap label={keys.rightUp} />
+              <KeyCap label={keys.rightDown} />
+            </div>
+          )}
         </div>
       </div>
 
@@ -116,7 +141,8 @@ function KeyCap({ label }: { label: string }) {
         height: '3rem',
         padding: '0 0.75rem',
         fontSize: label.length > 1 ? '0.75rem' : '1rem',
-        boxShadow: '0 0 8px rgba(57, 255, 20, 0.4), inset 0 0 8px rgba(57, 255, 20, 0.15)',
+        boxShadow:
+          '0 0 8px rgba(57, 255, 20, 0.4), inset 0 0 8px rgba(57, 255, 20, 0.15)',
         lineHeight: 1,
       }}
     >

@@ -2,15 +2,17 @@ import { useRef } from 'react';
 import { GAME_WIDTH, GAME_HEIGHT } from './constants';
 import { usePongGame } from './usePongGame';
 import type { GameState } from './types';
+import type { AIDifficulty } from './ai';
 
 type Props = {
   onMatchEnd?: (finalState: GameState, startedAt: Date, endedAt: Date) => void;
   aliases?: { left: string; right: string };
+  aiDifficulty?: AIDifficulty;
 };
 
-export function PongCanvas({ onMatchEnd, aliases }: Props) {
+export function PongCanvas({ onMatchEnd, aliases, aiDifficulty }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  usePongGame(canvasRef, { onMatchEnd, aliases });
+  usePongGame(canvasRef, { onMatchEnd, aliases, aiDifficulty });
 
   return (
     <canvas
