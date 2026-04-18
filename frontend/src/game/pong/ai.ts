@@ -9,10 +9,11 @@ const DIFFICULTY_PRESETS: Record<AIDifficulty, {
   hesitationChance: number;
   hesitationDuration: number;
   deadZone: number;
+  speedMultiplier: number;
 }> = {
-  EASY: { predictionError: 100, reactionDelay: 0.30, hesitationChance: 0.30, hesitationDuration: 0.6, deadZone: 25 },
-  NORMAL: { predictionError: 45,  reactionDelay: 0.18, hesitationChance: 0.12, hesitationDuration: 0.3, deadZone: 12 },
-  HARD: { predictionError: 10,  reactionDelay: 0.05, hesitationChance: 0.04, hesitationDuration: 0.15, deadZone: 4 },
+  EASY:   { predictionError: 25, reactionDelay: 0.35, hesitationChance: 0.20, hesitationDuration: 0.45,  deadZone: 15, speedMultiplier: 0.75 },
+  NORMAL: { predictionError: 15, reactionDelay: 0.2, hesitationChance: 0.12, hesitationDuration: 0.3,  deadZone: 10, speedMultiplier: 1.00 },
+  HARD:   { predictionError: 5,  reactionDelay: 0.03, hesitationChance: 0.03, hesitationDuration: 0.15, deadZone: 3,  speedMultiplier: 1.35 },
 };
 
 export type AIState = {
@@ -70,7 +71,11 @@ export function updateAI(
   aiState: AIState,
   difficulty: AIDifficulty,
   now: number,
-): { nextAIState: AIState; input: Pick<Input, 'rightUp' | 'rightDown'> } {
+): {
+  nextAIState: AIState;
+  input: Pick<Input, 'rightUp' | 'rightDown'>;
+  speedMultiplier: number;
+} {
   const preset = DIFFICULTY_PRESETS[difficulty];
   let next = { ...aiState };
 
@@ -94,9 +99,25 @@ export function updateAI(
 
     if (predicted !== null) {
       const noisy = predicted + gaussianNoise(preset.predictionError);
-      next.targetY = noisy - PADDLE_HEIGHT / 2;
+      if (noisy < PADDLE_HEIGHT / 2) {
+        next.targetY = 0;
+      } else if (noisy > GAME_HEIGHT - PADDLE_HEIGHT / 2) {
+        next.targetY = GAME_HEIGHT - PADDLE_HEIGHT;
+      } else {
+        next.targetY = noisy - PADDLE_HEIGHT / 2;
+      }
     } else {
-      next.targetY = GAME_HEIGHT / 2 - PADDLE_HEIGHT / 2;
+      const defensiveTargetCenter =
+        state.ball.y * 0.3 + (GAME_HEIGHT / 2) * 0.7;
+      const noisy = defensiveTargetCenter + gaussianNoise(preset.predictionError * 0.5);
+
+      if (noisy < PADDLE_HEIGHT / 2) {
+        next.targetY = 0;
+      } else if (noisy > GAME_HEIGHT - PADDLE_HEIGHT / 2) {
+        next.targetY = GAME_HEIGHT - PADDLE_HEIGHT;
+      } else {
+        next.targetY = noisy - PADDLE_HEIGHT / 2;
+      }
     }
 
     next.targetY = Math.max(0, Math.min(GAME_HEIGHT - PADDLE_HEIGHT, next.targetY));
@@ -104,7 +125,11 @@ export function updateAI(
 
   if (next.reactionTimer > 0) {
     next.reactionTimer = Math.max(0, next.reactionTimer - 1 / 60);
-    return { nextAIState: next, input: { rightUp: false, rightDown: false } };
+    return {
+      nextAIState: next,
+      input: { rightUp: false, rightDown: false },
+      speedMultiplier: preset.speedMultiplier,
+    };
   }
 
   if (next.hesitating) {
@@ -129,7 +154,11 @@ export function updateAI(
   }
 
   if (Math.abs(diff) < preset.deadZone) {
-    return { nextAIState: next, input: { rightUp: false, rightDown: false } };
+    return {
+      nextAIState: next,
+      input: { rightUp: false, rightDown: false },
+      speedMultiplier: preset.speedMultiplier,
+    };
   }
 
   return {
@@ -138,5 +167,6 @@ export function updateAI(
       rightUp: diff < 0,
       rightDown: diff > 0,
     },
+    speedMultiplier: preset.speedMultiplier,
   };
 }

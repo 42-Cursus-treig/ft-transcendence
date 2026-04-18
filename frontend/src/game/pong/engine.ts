@@ -44,14 +44,16 @@ export function createInitialState(): GameState {
 }
 
 export function updatePaddle(
-  currentY: number, 
-  up: boolean, 
-  down: boolean, 
-  dt: number
+  currentY: number,
+  up: boolean,
+  down: boolean,
+  dt: number,
+  speedMultiplier: number = 1,
 ): number {
   let newY = currentY;
-  if (up) newY -= PADDLE_SPEED * dt;
-  if (down) newY += PADDLE_SPEED * dt;
+  const speed = PADDLE_SPEED * speedMultiplier;
+  if (up) newY -= speed * dt;
+  if (down) newY += speed * dt;
 
   const minY = 0;
   const maxY = GAME_HEIGHT - PADDLE_HEIGHT;
@@ -61,11 +63,22 @@ export function updatePaddle(
   return newY;
 }
 
-export function updateGame(state: GameState, input: Input, dt: number): GameState {
+export function updateGame(
+  state: GameState,
+  input: Input,
+  dt: number,
+  rightSpeedMultiplier: number = 1,
+): GameState {
   if (state.status !== 'playing') return state;
 
   const leftY = updatePaddle(state.leftPaddle.y, input.leftUp, input.leftDown, dt);
-  const rightY = updatePaddle(state.rightPaddle.y, input.rightUp, input.rightDown, dt);
+  const rightY = updatePaddle(
+    state.rightPaddle.y,
+    input.rightUp,
+    input.rightDown,
+    dt,
+    rightSpeedMultiplier,
+  );
 
   const intermediate: GameState = {
     ...state,

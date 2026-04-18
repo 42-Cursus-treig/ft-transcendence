@@ -65,22 +65,24 @@ export function usePongGame(
       lastTime = now;
 
       let effectiveInput: Input = { ...keyboardInputRef.current };
+      let rightSpeedMultiplier = 1;
 
       const difficulty = aiDifficultyRef.current;
       if (difficulty && stateRef.current.status === 'playing') {
-        const { nextAIState, input: aiInput } = updateAI(
+        const result = updateAI(
           stateRef.current,
           aiStateRef.current,
           difficulty,
           now,
         );
-        aiStateRef.current = nextAIState;
-        effectiveInput.rightUp = aiInput.rightUp;
-        effectiveInput.rightDown = aiInput.rightDown;
+        aiStateRef.current = result.nextAIState;
+        effectiveInput.rightUp = result.input.rightUp;
+        effectiveInput.rightDown = result.input.rightDown;
+        rightSpeedMultiplier = result.speedMultiplier;
       }
 
       const prev = stateRef.current;
-      const next = updateGame(prev, effectiveInput, dt);
+      const next = updateGame(prev, effectiveInput, dt, rightSpeedMultiplier);
       stateRef.current = next;
 
       if (
