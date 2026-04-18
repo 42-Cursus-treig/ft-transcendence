@@ -29,10 +29,10 @@ export function render(
     drawPowerUp(ctx, state.powerUp, colors);
   }
 
-  const leftHasBig = state.activePowerUps.some((p) => p.side === 'left');
-  const rightHasBig = state.activePowerUps.some((p) => p.side === 'right');
-  drawPaddle(ctx, state.leftPaddle, colors, leftHasBig);
-  drawPaddle(ctx, state.rightPaddle, colors, rightHasBig);
+  const leftActive = state.activePowerUps.some((p) => p.side === 'left');
+  const rightActive = state.activePowerUps.some((p) => p.side === 'right');
+  drawPaddle(ctx, state.leftPaddle, colors, leftActive);
+  drawPaddle(ctx, state.rightPaddle, colors, rightActive);
 
   if (state.status !== 'finished') {
     drawBall(ctx, state.ball.x, state.ball.y, state.ball.size, colors);
@@ -95,7 +95,12 @@ function drawPowerUp(
   ctx.font = 'bold 14px "Press Start 2P", monospace';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('P', pu.x, pu.y);
+
+  const symbol = pu.type === 'BIG_PADDLE' ? '+'
+    : pu.type === 'SMALL_PADDLE' ? '-'
+    : '?';
+
+  ctx.fillText(symbol, pu.x, pu.y);
 }
 
 function drawScore(

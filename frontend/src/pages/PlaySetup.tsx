@@ -6,17 +6,24 @@ import {
   DEFAULT_SETTINGS,
   type GameSettings,
 } from '../game/pong/settings';
+import { useSessionStorage } from '../hooks/useSessionStorage';
 
 type GameMode = 'LOCAL' | 'AI';
 
 export function PlaySetup() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [mode, setMode] = useState<GameMode>('LOCAL');
-  const [userSide, setUserSide] = useState<'LEFT' | 'RIGHT'>('LEFT');
-  const [guestAlias, setGuestAlias] = useState('');
-  const [aiDifficulty, setAIDifficulty] = useState<AIDifficulty>('NORMAL');
-  const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS);
+  const [mode, setMode] = useSessionStorage<GameMode>('pong.setup.mode', 'LOCAL');
+  const [userSide, setUserSide] = useSessionStorage<'LEFT' | 'RIGHT'>('pong.setup.userSide', 'LEFT');
+  const [guestAlias, setGuestAlias] = useSessionStorage<string>('pong.setup.guestAlias', '');
+  const [aiDifficulty, setAIDifficulty] = useSessionStorage<AIDifficulty>(
+    'pong.setup.aiDifficulty',
+    'NORMAL',
+  );
+  const [settings, setSettings, resetSettings] = useSessionStorage<GameSettings>(
+    'pong.setup.settings',
+    DEFAULT_SETTINGS,
+  );
   const [error, setError] = useState('');
 
   if (!user) return null;
@@ -24,9 +31,7 @@ export function PlaySetup() {
   const updateSettings = <K extends keyof GameSettings>(
     key: K,
     value: GameSettings[K],
-  ) => setSettings((s) => ({ ...s, [key]: value }));
-
-  const resetToDefault = () => setSettings(DEFAULT_SETTINGS);
+  ) => setSettings({ ...settings, [key]: value });
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -139,7 +144,7 @@ export function PlaySetup() {
             </h2>
             <button
               type="button"
-              onClick={resetToDefault}
+              onClick={resetSettings}
               className="font-body text-sm text-muted hover:text-accent uppercase"
             >
               reset defaults
@@ -218,7 +223,7 @@ export function PlaySetup() {
               </ToggleButton>
             </div>
             <p className="font-body text-sm text-muted mt-2">
-              // Hit power-ups with the ball to boost your paddle
+              // [+] Big paddle · [-] Small paddle · [?] Invert controls
             </p>
           </SettingSection>
 

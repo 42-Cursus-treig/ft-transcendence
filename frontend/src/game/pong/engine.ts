@@ -4,8 +4,10 @@ import {
   BALL_SIZE,
   POWERUP_SIZE, POWERUP_SPAWN_INTERVAL_MS,
   POWERUP_BIG_PADDLE_DURATION_MS, POWERUP_BIG_PADDLE_MULTIPLIER,
+  POWERUP_SMALL_PADDLE_DURATION_MS, POWERUP_SMALL_PADDLE_MULTIPLIER,
+  POWERUP_INVERT_CONTROLS_DURATION_MS,
 } from './constants';
-import type { GameState, Input, Side, PowerUp } from './types';
+import type { GameState, Input, Side, PowerUp, PowerUpType } from './types';
 import type { ResolvedSettings } from './settings';
 
 export function createInitialState(settings: ResolvedSettings): GameState {
@@ -169,13 +171,17 @@ function resetBall(
   };
 }
 
+const POWERUP_TYPES: PowerUpType[] = ['BIG_PADDLE', 'SMALL_PADDLE', 'INVERT_CONTROLS'];
+
 function maybeSpawnPowerUp(state: GameState, now: number): PowerUp | null {
   if (state.powerUp) return state.powerUp;
   if (now - state.lastPowerUpSpawnAt < POWERUP_SPAWN_INTERVAL_MS) return null;
-  if (Math.random() > 0.02) return null;
+  if (Math.random() > 0.005) return null;
+
+  const type = POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)];
 
   return {
-    type: 'BIG_PADDLE',
+    type,
     x: GAME_WIDTH / 2,
     y: GAME_HEIGHT * 0.25 + Math.random() * GAME_HEIGHT * 0.5,
     size: POWERUP_SIZE,
@@ -209,18 +215,31 @@ export function updateGame(
   if (state.status !== 'playing') return state;
 
   const activePowerUps = state.activePowerUps.filter((p) => p.expiresAt > now);
-  const leftHasBig = activePowerUps.some((p) => p.side === 'left' && p.type === 'BIG_PADDLE');
-  const rightHasBig = activePowerUps.some((p) => p.side === 'right' && p.type === 'BIG_PADDLE');
-  const leftHeight = leftHasBig
-    ? state.leftPaddle.baseHeight * POWERUP_BIG_PADDLE_MULTIPLIER
-    : state.leftPaddle.baseHeight;
-  const rightHeight = rightHasBig
-    ? state.rightPaddle.baseHeight * POWERUP_BIG_PADDLE_MULTIPLIER
-    : state.rightPaddle.baseHeight;
 
-  const leftY = updatePaddle(state.leftPaddle.y, input.leftUp, input.leftDown, dt, leftHeight);
+  const paddleHeightMultiplier = (side: Side): number => {
+    let mult = 1;
+    for (const p of activePowerUps) {
+      if (p.side !== side) continue;
+      if (p.type === 'BIG_PADDLE') mult *= POWERUP_BIG_PADDLE_MULTIPLIER;
+      if (p.type === 'SMALL_PADDLE') mult *= POWERUP_SMALL_PADDLE_MULTIPLIER;
+    }
+    return mult;
+  };
+
+  const hasInvertedControls = (side: Side): boolean =>
+    activePowerUps.some((p) => p.side === side && p.type === 'INVERT_CONTROLS');
+
+  const leftHeight = state.leftPaddle.baseHeight * paddleHeightMultiplier('left');
+  const rightHeight = state.rightPaddle.baseHeight * paddleHeightMultiplier('right');
+
+  const leftUp = hasInvertedControls('left') ? input.leftDown : input.leftUp;
+  const leftDown = hasInvertedControls('left') ? input.leftUp : input.leftDown;
+  const rightUp = hasInvertedControls('right') ? input.rightDown : input.rightUp;
+  const rightDown = hasInvertedControls('right') ? input.rightUp : input.rightDown;
+
+  const leftY = updatePaddle(state.leftPaddle.y, leftUp, leftDown, dt, leftHeight);
   const rightY = updatePaddle(
-    state.rightPaddle.y, input.rightUp, input.rightDown, dt,
+    state.rightPaddle.y, rightUp, rightDown, dt,
     rightHeight, rightSpeedMultiplier,
   );
 
@@ -239,13 +258,33 @@ export function updateGame(
 
   if (settings.powerUpsEnabled) {
     if (powerUp && checkPowerUpCollision(powerUp, ball.x, ball.y, ball.size)) {
-      const beneficiary: Side = ball.vx > 0 ? 'left' : 'right';
+      const hitter: Side = ball.vx > 0 ? 'left' : 'right';
+      const opponent: Side = hitter === 'left' ? 'right' : 'left';
+
+      let affectedSide: Side;
+      let durationMs: number;
+
+      switch (powerUp.type) {
+        case 'BIG_PADDLE':
+          affectedSide = hitter;
+          durationMs = POWERUP_BIG_PADDLE_DURATION_MS;
+          break;
+        case 'SMALL_PADDLE':
+          affectedSide = opponent;
+          durationMs = POWERUP_SMALL_PADDLE_DURATION_MS;
+          break;
+        case 'INVERT_CONTROLS':
+          affectedSide = opponent;
+          durationMs = POWERUP_INVERT_CONTROLS_DURATION_MS;
+          break;
+      }
+
       newActive = [
         ...activePowerUps,
         {
-          type: 'BIG_PADDLE',
-          side: beneficiary,
-          expiresAt: now + POWERUP_BIG_PADDLE_DURATION_MS,
+          type: powerUp.type,
+          side: affectedSide,
+          expiresAt: now + durationMs,
         },
       ];
       powerUp = null;

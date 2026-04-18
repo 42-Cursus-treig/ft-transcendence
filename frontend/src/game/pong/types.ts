@@ -24,7 +24,7 @@ export type Score = {
 
 export type GameStatus = 'idle' | 'playing' | 'paused' | 'finished';
 
-export type PowerUpType = 'BIG_PADDLE';
+export type PowerUpType = 'BIG_PADDLE' | 'SMALL_PADDLE' | 'INVERT_CONTROLS';
 
 export type PowerUp = {
   type: PowerUpType;

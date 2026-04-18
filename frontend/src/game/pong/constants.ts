@@ -12,9 +12,12 @@ export const BALL_SIZE = 12;
 
 // Power-ups
 export const POWERUP_SIZE = 24;
-export const POWERUP_SPAWN_INTERVAL_MS = 8000;
+export const POWERUP_SPAWN_INTERVAL_MS = 20000;
 export const POWERUP_BIG_PADDLE_DURATION_MS = 8000;
 export const POWERUP_BIG_PADDLE_MULTIPLIER = 1.6;
+export const POWERUP_SMALL_PADDLE_DURATION_MS = 8000;
+export const POWERUP_SMALL_PADDLE_MULTIPLIER = 0.55;
+export const POWERUP_INVERT_CONTROLS_DURATION_MS = 5000;
 
 // Valeurs par défaut
 export const BALL_INITIAL_SPEED = 400;
