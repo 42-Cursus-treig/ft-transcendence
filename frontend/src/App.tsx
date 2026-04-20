@@ -11,6 +11,8 @@ import { Terms } from './pages/Terms';
 import { PlaySetup } from './pages/PlaySetup';
 import { PongMatch } from './pages/PongMatch';
 import { useTranslation } from 'react-i18next';
+import { RemoteLobby } from './pages/RemoteLobby';
+import { RemoteMatch } from './pages/RemoteMatch';
 
 function NotFound() {
   const { t } = useTranslation();
@@ -46,6 +48,8 @@ export function App() {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="*" element={<NotFound />} />
+          <Route path="/remote" element={<ProtectedRoute><RemoteLobby /></ProtectedRoute>} />
+          <Route path="/remote/match/:id" element={<ProtectedRoute><RemoteMatch /></ProtectedRoute>} />
         </Route>
       </Routes>
       </AuthProvider>

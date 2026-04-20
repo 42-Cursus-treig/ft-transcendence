@@ -45,9 +45,14 @@ export function Home() {
 
       <div className="flex flex-wrap gap-4 justify-center">
         {user ? (
-          <Link to="/play" className="btn-arcade-primary">
-            &gt; PLAY
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/play" className="btn-arcade-primary">
+              &gt; LOCAL / VS CPU
+            </Link>
+            <Link to="/remote" className="btn-arcade-primary">
+              &gt; ONLINE
+            </Link>
+          </div>
         ) : (
           <>
             <Link to="/register" className="btn-arcade-primary">
