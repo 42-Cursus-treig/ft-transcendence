@@ -8,7 +8,10 @@
     "back": "Back",
     "cancel": "Cancel",
     "close": "Close",
-    "save": "Save"
+    "save": "Save",
+    "previous": "Previous",
+    "next": "Next",
+    "pageOfTotal": "Page {{current}} / {{total}}"
   },
   "nav": {
     "privacy": "Privacy Policy",
@@ -81,7 +84,8 @@
     "noMatches": "No matches yet.",
     "playFirstGame": "Play your first game!",
     "win": "WIN",
-    "loss": "LOSS"
+    "loss": "LOSS",
+    "matchCount": "{{count}} matches total"
   },
   "play": {
     "setupTitle": "Match Setup",

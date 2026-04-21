@@ -84,23 +84,47 @@ export const matchRoutes: FastifyPluginAsync = async (app) => {
     { preHandler: [app.requireAuth] },
     async (request) => {
       const user = request.user!;
-      const matches = await app.prisma.match.findMany({
-        where: { participants: { some: { userId: user.id } } },
-        include: {
-          participants: {
-            select: {
-              alias: true,
-              side: true,
-              score: true,
-              userId: true,
-              isGuest: true,
+
+      const query = request.query as { page?: string; pageSize?: string };
+      const page = Math.max(1, parseInt(query.page ?? '1', 10) || 1);
+      const pageSize = Math.min(50, Math.max(1, parseInt(query.pageSize ?? '10', 10) || 10));
+      const skip = (page - 1) * pageSize;
+
+      const where = {
+        participants: { some: { userId: user.id } },
+      };
+
+      const [total, matches] = await Promise.all([
+        app.prisma.match.count({ where }),
+        app.prisma.match.findMany({
+          where,
+          include: {
+            participants: {
+              select: {
+                alias: true,
+                side: true,
+                score: true,
+                userId: true,
+                isGuest: true,
+              },
             },
           },
+          orderBy: { endedAt: 'desc' },
+          skip,
+          take: pageSize,
+        }),
+      ]);
+
+      return {
+        matches,
+        pagination: {
+          page,
+          pageSize,
+          total,
+          totalPages: Math.ceil(total / pageSize),
+          hasMore: page * pageSize < total,
         },
-        orderBy: { endedAt: 'desc' },
-        take: 20,
-      });
-      return { matches };
+      };
     },
   );
 };

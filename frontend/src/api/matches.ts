@@ -37,8 +37,28 @@ export type MatchDTO = {
   participants: MatchParticipantDTO[];
 };
 
+export type Pagination = {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+  hasMore: boolean;
+};
+
+export type ListMineResponse = {
+  matches: MatchDTO[];
+  pagination: Pagination;
+};
+
 export const matchApi = {
   create: (payload: CreateMatchPayload) =>
     api.post<{ match: MatchDTO }>('/matches', payload),
-  listMine: () => api.get<{ matches: MatchDTO[] }>('/matches/me'),
+  
+  listMine: async (page = 1, pageSize = 10): Promise<ListMineResponse> => {
+    const params = new URLSearchParams({
+      page: String(page),
+      pageSize: String(pageSize),
+    });
+    return api.get<ListMineResponse>(`/matches/me?${params}`);
+  },
 };

@@ -8,7 +8,10 @@
     "back": "Atrás",
     "cancel": "Cancelar",
     "close": "Cerrar",
-    "save": "Guardar"
+    "save": "Guardar",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "pageOfTotal": "Página {{current}} / {{total}}"
   },
   "nav": {
     "privacy": "Política de privacidad",
@@ -81,7 +84,8 @@
     "noMatches": "Aún no hay partidos.",
     "playFirstGame": "¡Juega tu primer partido!",
     "win": "VICTORIA",
-    "loss": "DERROTA"
+    "loss": "DERROTA",
+    "matchCount": "{{count}} partidos en total"
   },
   "play": {
     "setupTitle": "Configuración del partido",

@@ -8,7 +8,10 @@
     "back": "Retour",
     "cancel": "Annuler",
     "close": "Fermer",
-    "save": "Enregistrer"
+    "save": "Enregistrer",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "pageOfTotal": "Page {{current}} / {{total}}"
   },
   "nav": {
     "privacy": "Politique de confidentialité",
@@ -81,7 +84,8 @@
     "noMatches": "Aucun match pour l'instant.",
     "playFirstGame": "Jouez votre première partie !",
     "win": "VICTOIRE",
-    "loss": "DÉFAITE"
+    "loss": "DÉFAITE",
+    "matchCount": "{{count}} matchs au total"
   },
   "play": {
     "setupTitle": "Configuration du match",

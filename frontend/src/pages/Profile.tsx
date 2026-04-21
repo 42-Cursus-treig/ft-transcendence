@@ -1,23 +1,33 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthContext';
-import { matchApi, type MatchDTO } from '../api/matches';
+import { matchApi, type MatchDTO, type Pagination } from '../api/matches';
+
+const PAGE_SIZE = 10;
 
 export function Profile() {
   const { user } = useAuth();
   const { t } = useTranslation();
   const [matches, setMatches] = useState<MatchDTO[] | null>(null);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     let cancelled = false;
+    setLoading(true);
     matchApi
-      .listMine()
+      .listMine(page, PAGE_SIZE)
       .then((data) => {
-        if (!cancelled) setMatches(data.matches);
+        if (cancelled) return;
+        setMatches(data.matches);
+        setPagination(data.pagination);
       })
       .catch(() => {
-        if (!cancelled) setMatches([]);
+        if (!cancelled) {
+          setMatches([]);
+          setPagination(null);
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -25,7 +35,7 @@ export function Profile() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [page]);
 
   if (!user) return null;
 
@@ -60,23 +70,92 @@ export function Profile() {
       </div>
 
       <div className="mt-10">
-        <h2 className="font-display text-lg neon text-accent mb-4">
-          &gt; {t('profile.matchHistory').toUpperCase()}
-        </h2>
+        <div className="flex justify-between items-baseline mb-4">
+          <h2 className="font-display text-lg neon text-accent">
+            &gt; {t('profile.matchHistory').toUpperCase()}
+          </h2>
+          {pagination && pagination.total > 0 && (
+            <span className="font-body text-sm text-muted">
+              {t('profile.matchCount', { count: pagination.total })}
+            </span>
+          )}
+        </div>
+
         {loading ? (
           <p className="font-body text-muted">&gt; {t('common.loading')}</p>
         ) : matches && matches.length > 0 ? (
-          <div className="space-y-2">
-            {matches.map((m) => (
-              <MatchRow key={m.id} match={m} currentUserId={user.id} t={t} />
-            ))}
-          </div>
+          <>
+            <div className="space-y-2">
+              {matches.map((m) => (
+                <MatchRow key={m.id} match={m} currentUserId={user.id} t={t} />
+              ))}
+            </div>
+
+            {pagination && pagination.totalPages > 1 && (
+              <PaginationControls
+                pagination={pagination}
+                onPrev={() => setPage((p) => Math.max(1, p - 1))}
+                onNext={() => setPage((p) => p + 1)}
+                t={t}
+              />
+            )}
+          </>
         ) : (
           <p className="font-body text-muted">
             &gt; {t('profile.noMatches')} <span className="text-accent-cyan">{t('profile.playFirstGame')}</span>
           </p>
         )}
       </div>
+    </div>
+  );
+}
+
+function PaginationControls({
+  pagination,
+  onPrev,
+  onNext,
+  t,
+}: {
+  pagination: Pagination;
+  onPrev: () => void;
+  onNext: () => void;
+  t: (key: string, opts?: Record<string, unknown>) => string;
+}) {
+  const isFirstPage = pagination.page === 1;
+  const isLastPage = !pagination.hasMore;
+
+  return (
+    <div className="mt-6 flex items-center justify-between font-body">
+      <button
+        onClick={onPrev}
+        disabled={isFirstPage}
+        className={`btn-arcade ${
+          isFirstPage
+            ? 'opacity-40 cursor-not-allowed border-muted text-muted'
+            : 'border-accent text-accent hover:bg-accent hover:text-bg'
+        }`}
+      >
+        &lt; {t('common.previous')}
+      </button>
+
+      <span className="font-display text-sm text-muted">
+        {t('common.pageOfTotal', {
+          current: pagination.page,
+          total: pagination.totalPages,
+        })}
+      </span>
+
+      <button
+        onClick={onNext}
+        disabled={isLastPage}
+        className={`btn-arcade ${
+          isLastPage
+            ? 'opacity-40 cursor-not-allowed border-muted text-muted'
+            : 'border-accent text-accent hover:bg-accent hover:text-bg'
+        }`}
+      >
+        {t('common.next')} &gt;
+      </button>
     </div>
   );
 }
