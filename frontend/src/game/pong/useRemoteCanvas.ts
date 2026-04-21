@@ -85,7 +85,7 @@ export function useRemoteCanvas(
         stateToRender = snapshots[0].state;
       }
 
-      render(ctx, stateToRender, themeRef.current, aliasesRef.current);
+      render(ctx, stateToRender, themeRef.current, aliasesRef.current, { hideEndOverlay: true });
       animationFrameId = requestAnimationFrame(loop);
     };
 

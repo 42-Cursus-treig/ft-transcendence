@@ -3,11 +3,16 @@ import type { GameState, PowerUp } from './types';
 import { THEMES } from './themes';
 import type { Theme } from './settings';
 
+type RenderOptions = {
+  hideEndOverlay?: boolean;
+};
+
 export function render(
   ctx: CanvasRenderingContext2D,
   state: GameState,
   theme: Theme = 'CLASSIC',
   aliases?: { left: string; right: string },
+  options: RenderOptions = {},
 ): void {
   const colors = THEMES[theme];
 
@@ -42,7 +47,7 @@ export function render(
     drawOverlay(ctx, colors, 'PRESS SPACE TO START');
   } else if (state.status === 'paused') {
     drawOverlay(ctx, colors, 'PAUSED');
-  } else if (state.status === 'finished' && state.winner) {
+  } else if (state.status === 'finished' && state.winner && !options.hideEndOverlay) {
     const winnerName = aliases
       ? (state.winner === 'left' ? aliases.left : aliases.right)
       : (state.winner === 'left' ? 'LEFT PLAYER' : 'RIGHT PLAYER');
