@@ -10,6 +10,7 @@ import { oauthRoutes } from './routes/oauth.js';
 import authPlugin from './plugins/auth.js';
 import websocketPlugin from './plugins/websocket.js';
 import { remoteRoutes } from './routes/remote.js';
+import { setPrismaForGameLoop } from './remote/gameLoop.js';
 
 const prisma = new PrismaClient();
 
@@ -33,6 +34,7 @@ await app.register(cookie, {
 });
 
 app.decorate('prisma', prisma);
+setPrismaForGameLoop(app.prisma);
 
 await app.register(websocketPlugin);
 await app.register(authPlugin);

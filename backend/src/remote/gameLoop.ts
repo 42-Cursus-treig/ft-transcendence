@@ -3,11 +3,19 @@ import type { Input } from '../game/pong/types.js';
 import { updateGame } from '../game/pong/engine.js';
 import { resolveSettings } from '../game/pong/settings.js';
 import { remoteRegistry } from './registry.js';
+import type { PrismaClient } from '@prisma/client';
+import { persistRemoteMatch } from './persistence.js';
 
 const TICK_RATE = 60;
 const TICK_INTERVAL_MS = 1000 / TICK_RATE;
 const BROADCAST_INTERVAL_MS = 1000 / 30;
 const GRACE_PERIOD_MS = 15_000;
+
+let prismaClient: PrismaClient | null = null;
+
+export function setPrismaForGameLoop(p: PrismaClient): void {
+  prismaClient = p;
+}
 
 export function startMatch(match: RemoteMatch): void {
   if (match.status !== 'READY') return;
@@ -101,6 +109,13 @@ function finishMatch(match: RemoteMatch): void {
     score: match.gameState.score,
   });
 
+  if (prismaClient && match.gameState.winner) {
+    const winnerSide = match.gameState.winner === 'left' ? 'LEFT' : 'RIGHT';
+    persistRemoteMatch(prismaClient, match, winnerSide).catch((err) => {
+      console.error('[finish] Persistence error:', err);
+    });
+  }
+
   setTimeout(() => remoteRegistry.remove(match.id), 30_000);
 }
 
@@ -133,6 +148,15 @@ export function handlePlayerDisconnect(
       score: match.gameState.score,
       reason: 'opponent_timeout',
     });
+
+    // Persistance en BDD
+    if (prismaClient) {
+      const winnerSide = winner === 'left' ? 'LEFT' : 'RIGHT';
+      persistRemoteMatch(prismaClient, match, winnerSide).catch((err) => {
+        console.error('[forfeit] Persistence error:', err);
+      });
+    }
+
     setTimeout(() => remoteRegistry.remove(match.id), 30_000);
   }, GRACE_PERIOD_MS);
 }
