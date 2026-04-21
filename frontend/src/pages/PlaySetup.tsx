@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthContext';
 import type { AIDifficulty } from '../game/pong/ai';
 import {
@@ -13,6 +14,7 @@ type GameMode = 'LOCAL' | 'AI';
 export function PlaySetup() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [mode, setMode] = useSessionStorage<GameMode>('pong.setup.mode', 'LOCAL');
   const [userSide, setUserSide] = useSessionStorage<'LEFT' | 'RIGHT'>('pong.setup.userSide', 'LEFT');
   const [guestAlias, setGuestAlias] = useSessionStorage<string>('pong.setup.guestAlias', '');
@@ -40,11 +42,11 @@ export function PlaySetup() {
     if (mode === 'LOCAL') {
       const trimmed = guestAlias.trim();
       if (trimmed.length < 1 || trimmed.length > 30) {
-        setError('Guest alias must be between 1 and 30 characters');
+        setError(t('validation.aliasLength'));
         return;
       }
       if (trimmed.toLowerCase() === user.username.toLowerCase()) {
-        setError('Guest alias must differ from your username');
+        setError(t('validation.aliasDifferent'));
         return;
       }
       const leftAlias = userSide === 'LEFT' ? user.username : trimmed;
@@ -71,47 +73,47 @@ export function PlaySetup() {
     <div className="max-w-xl mx-auto px-4 py-16">
       <div className="arcade-panel">
         <h1 className="font-display text-xl neon text-accent mb-2">
-          &gt; MATCH SETUP
+          &gt; {t('play.setupTitle').toUpperCase()}
         </h1>
         <p className="font-body text-base text-muted mb-8">
-          CHOOSE YOUR GAME<span className="cursor-blink"></span>
+          {t('play.chooseGame')}<span className="cursor-blink"></span>
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-          <SettingSection label="MODE">
+          <SettingSection label={t('play.mode')}>
             <div className="grid grid-cols-2 gap-3">
               <ToggleButton active={mode === 'LOCAL'} onClick={() => setMode('LOCAL')}>
-                LOCAL 1V1
+                {t('play.localVs')}
               </ToggleButton>
               <ToggleButton active={mode === 'AI'} onClick={() => setMode('AI')}>
-                VS CPU
+                {t('play.vsCpu')}
               </ToggleButton>
             </div>
           </SettingSection>
 
           {mode === 'LOCAL' ? (
             <>
-              <SettingSection label="YOUR SIDE">
+              <SettingSection label={t('play.yourSide')}>
                 <div className="grid grid-cols-2 gap-3">
                   <ToggleButton active={userSide === 'LEFT'} onClick={() => setUserSide('LEFT')}>
-                    &lt; LEFT
+                    &lt; {t('play.left')}
                   </ToggleButton>
                   <ToggleButton active={userSide === 'RIGHT'} onClick={() => setUserSide('RIGHT')}>
-                    RIGHT &gt;
+                    {t('play.right')} &gt;
                   </ToggleButton>
                 </div>
                 <p className="font-body text-sm text-muted mt-2">
-                  You are: <span className="text-accent">{user.username}</span>
+                  {t('play.youAre')}: <span className="text-accent">{user.username}</span>
                 </p>
               </SettingSection>
 
-              <SettingSection label="OPPONENT NAME">
+              <SettingSection label={t('play.opponentName')}>
                 <input
                   id="guestAlias"
                   type="text"
                   value={guestAlias}
                   onChange={(e) => setGuestAlias(e.target.value)}
-                  placeholder="Guest"
+                  placeholder={t('play.guestPlaceholder')}
                   maxLength={30}
                   className="input-arcade"
                   autoComplete="off"
@@ -119,7 +121,7 @@ export function PlaySetup() {
               </SettingSection>
             </>
           ) : (
-            <SettingSection label="CPU DIFFICULTY">
+            <SettingSection label={t('play.cpuDifficulty')}>
               <div className="grid grid-cols-3 gap-2">
                 {(['EASY', 'NORMAL', 'HARD'] as const).map((d) => (
                   <ToggleButton
@@ -127,31 +129,33 @@ export function PlaySetup() {
                     active={aiDifficulty === d}
                     onClick={() => setAIDifficulty(d)}
                   >
-                    {d}
+                    {t(`play.${d.toLowerCase()}`)}
                   </ToggleButton>
                 ))}
               </div>
               <p className="font-body text-sm text-muted mt-2">
-                You play <span className="text-accent">LEFT</span>, CPU plays{' '}
-                <span className="text-accent">RIGHT</span>
+                {t('play.cpuPlaysRight', {
+                  side: t('play.left'),
+                  otherSide: t('play.right'),
+                })}
               </p>
             </SettingSection>
           )}
 
           <div className="border-t-2 border-border pt-6 flex items-center justify-between">
             <h2 className="font-display text-sm text-accent-cyan">
-              &gt; CUSTOMIZATION
+              &gt; {t('play.customization')}
             </h2>
             <button
               type="button"
               onClick={resetSettings}
               className="font-body text-sm text-muted hover:text-accent uppercase"
             >
-              reset defaults
+              {t('play.resetDefaults')}
             </button>
           </div>
 
-          <SettingSection label="BALL SPEED">
+          <SettingSection label={t('play.ballSpeed')}>
             <div className="grid grid-cols-3 gap-2">
               {(['SLOW', 'NORMAL', 'FAST'] as const).map((v) => (
                 <ToggleButton
@@ -159,13 +163,13 @@ export function PlaySetup() {
                   active={settings.ballSpeed === v}
                   onClick={() => updateSettings('ballSpeed', v)}
                 >
-                  {v}
+                  {t(`play.${v.toLowerCase()}`)}
                 </ToggleButton>
               ))}
             </div>
           </SettingSection>
 
-          <SettingSection label="PADDLE SIZE">
+          <SettingSection label={t('play.paddleSize')}>
             <div className="grid grid-cols-3 gap-2">
               {(['SMALL', 'NORMAL', 'LARGE'] as const).map((v) => (
                 <ToggleButton
@@ -173,13 +177,13 @@ export function PlaySetup() {
                   active={settings.paddleSize === v}
                   onClick={() => updateSettings('paddleSize', v)}
                 >
-                  {v}
+                  {t(`play.${v.toLowerCase()}`)}
                 </ToggleButton>
               ))}
             </div>
           </SettingSection>
 
-          <SettingSection label="SCORE TO WIN">
+          <SettingSection label={t('play.scoreToWin')}>
             <div className="grid grid-cols-3 gap-2">
               {([3, 5, 7] as const).map((v) => (
                 <ToggleButton
@@ -187,13 +191,13 @@ export function PlaySetup() {
                   active={settings.scoreToWin === v}
                   onClick={() => updateSettings('scoreToWin', v)}
                 >
-                  {v} PTS
+                  {v} {t('play.points')}
                 </ToggleButton>
               ))}
             </div>
           </SettingSection>
 
-          <SettingSection label="THEME">
+          <SettingSection label={t('play.theme')}>
             <div className="grid grid-cols-3 gap-2">
               {(['CLASSIC', 'SYNTHWAVE', 'MONO'] as const).map((v) => (
                 <ToggleButton
@@ -201,29 +205,29 @@ export function PlaySetup() {
                   active={settings.theme === v}
                   onClick={() => updateSettings('theme', v)}
                 >
-                  {v}
+                  {t(`play.${v.toLowerCase()}`)}
                 </ToggleButton>
               ))}
             </div>
           </SettingSection>
 
-          <SettingSection label="POWER-UPS">
+          <SettingSection label={t('play.powerUps')}>
             <div className="grid grid-cols-2 gap-3">
               <ToggleButton
                 active={!settings.powerUpsEnabled}
                 onClick={() => updateSettings('powerUpsEnabled', false)}
               >
-                OFF
+                {t('play.off')}
               </ToggleButton>
               <ToggleButton
                 active={settings.powerUpsEnabled}
                 onClick={() => updateSettings('powerUpsEnabled', true)}
               >
-                ON
+                {t('play.on')}
               </ToggleButton>
             </div>
             <p className="font-body text-sm text-muted mt-2">
-              // [+] Big paddle · [-] Small paddle · [?] Invert controls
+              // {t('play.powerUpsHint')}
             </p>
           </SettingSection>
 
@@ -234,7 +238,7 @@ export function PlaySetup() {
           )}
 
           <button type="submit" className="btn-arcade-primary w-full">
-            &gt; START MATCH
+            &gt; {t('play.startMatch')}
           </button>
         </form>
       </div>

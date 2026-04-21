@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { remoteApi, type RemoteMatchSummary } from '../api/remote';
 import { ApiException } from '../api/client';
 import { DEFAULT_SETTINGS, type GameSettings } from '../game/pong/settings';
@@ -11,6 +12,7 @@ const REFRESH_INTERVAL_MS = 4000;
 export function RemoteLobby() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [matches, setMatches] = useState<RemoteMatchSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -61,7 +63,7 @@ export function RemoteLobby() {
         }
         setError(err.data.error);
       } else {
-        setError('Could not create match');
+        setError(t('remote.couldNotJoin'));
       }
     } finally {
       setCreating(false);
@@ -84,7 +86,7 @@ export function RemoteLobby() {
         }
         setError(err.data.error);
       } else {
-        setError('Could not join match');
+        setError(t('remote.couldNotJoin'));
       }
     }
   };
@@ -94,36 +96,35 @@ export function RemoteLobby() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
       <h1 className="font-display text-2xl neon text-accent mb-2">
-        &gt; REMOTE LOBBY
+        &gt; {t('remote.lobbyTitle').toUpperCase()}
       </h1>
       <p className="font-body text-base text-muted mb-8">
-        PLAY AGAINST ANOTHER HUMAN OVER THE NETWORK
+        {t('remote.lobbySubtitle').toUpperCase()}
         <span className="cursor-blink"></span>
       </p>
 
       <div className="arcade-panel mb-8">
-        <p className="font-display text-xs text-accent-cyan mb-3">HOST A MATCH</p>
+        <p className="font-display text-xs text-accent-cyan mb-3">{t('remote.hostAMatch')}</p>
         <p className="font-body text-base text-muted mb-4">
-          Settings will use your current customization from /play.
-          Share the invite link with a friend or wait for someone to join from the lobby.
+          {t('remote.hostSettingsHint')}
         </p>
         <button
           onClick={handleCreate}
           disabled={creating}
           className="btn-arcade-primary"
         >
-          {creating ? '> CREATING…' : '> CREATE MATCH'}
+          {creating ? `> ${t('remote.creating')}` : `> ${t('remote.createMatch')}`}
         </button>
       </div>
 
       <div>
-        <p className="font-display text-xs text-accent-cyan mb-4">OPEN MATCHES</p>
+        <p className="font-display text-xs text-accent-cyan mb-4">{t('remote.openMatches')}</p>
         {loading ? (
-          <p className="font-body text-muted">&gt; Loading…</p>
+          <p className="font-body text-muted">&gt; {t('common.loading')}</p>
         ) : matches.length === 0 ? (
           <p className="font-body text-muted">
-            &gt; No open matches.
-            <span className="text-accent-cyan"> Be the first to host!</span>
+            &gt; {t('remote.noOpenMatches')}
+            <span className="text-accent-cyan"> {t('remote.beTheFirst')}</span>
           </p>
         ) : (
           <div className="space-y-2">
@@ -133,6 +134,7 @@ export function RemoteLobby() {
                 match={m}
                 onJoin={() => handleJoin(m.id)}
                 disabled={m.hostUsername === user.username}
+                t={t}
               />
             ))}
           </div>
@@ -150,10 +152,12 @@ function MatchRow({
   match,
   onJoin,
   disabled,
+  t,
 }: {
   match: RemoteMatchSummary;
   onJoin: () => void;
   disabled: boolean;
+  t: (key: string, opts?: Record<string, unknown>) => string;
 }) {
   return (
     <div className="border-2 border-border p-3 flex items-center gap-3 font-body">
@@ -161,16 +165,17 @@ function MatchRow({
         {match.hostUsername.toUpperCase()}
       </span>
       <span className="text-muted text-sm flex-1">
-        {match.settings.ballSpeed} · {match.settings.paddleSize} ·
-        {' '}FIRST TO {match.settings.scoreToWin}
-        {match.settings.powerUpsEnabled && ' · POWER-UPS'}
+        {t(`play.${match.settings.ballSpeed.toLowerCase()}`)} ·
+        {' '}{t(`play.${match.settings.paddleSize.toLowerCase()}`)} ·
+        {' '}{t('pong.firstToWins', { score: match.settings.scoreToWin })}
+        {match.settings.powerUpsEnabled && ` · ${t('play.powerUps')}`}
       </span>
       <button
         onClick={onJoin}
         disabled={disabled}
         className="btn-arcade-primary"
       >
-        {disabled ? '> YOUR MATCH' : '> JOIN'}
+        {disabled ? `> ${t('remote.yourMatch')}` : `> ${t('remote.join')}`}
       </button>
     </div>
   );

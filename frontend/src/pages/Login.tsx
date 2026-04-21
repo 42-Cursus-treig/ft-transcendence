@@ -18,11 +18,11 @@ export function Login() {
   const oauthError = searchParams.get('oauth_error');
 
   const oauthErrorMessage = oauthError === 'denied'
-    ? 'You denied access on 42.'
+    ? t('auth.oauthDenied')
     : oauthError === 'state_mismatch'
-    ? 'Security check failed, please retry.'
+    ? t('auth.oauthStateMismatch')
     : oauthError === 'server_error'
-    ? 'OAuth server error, please retry.'
+    ? t('auth.oauthServerError')
     : null;
 
   const handleSubmit = async (e: FormEvent) => {
@@ -61,7 +61,7 @@ export function Login() {
           &gt; {t('auth.loginTitle')}
         </h1>
         <p className="font-body text-base text-muted mb-8">
-          AUTHENTICATION REQUIRED<span className="cursor-blink"></span>
+          {t('auth.loginTitle').toUpperCase()}<span className="cursor-blink"></span>
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6" noValidate>
@@ -105,7 +105,7 @@ export function Login() {
 
         <div className="flex items-center gap-3 my-6">
           <div className="flex-1 border-t border-border"></div>
-          <span className="font-body text-sm text-muted">OR</span>
+          <span className="font-body text-sm text-muted">·</span>
           <div className="flex-1 border-t border-border"></div>
         </div>
 
@@ -113,12 +113,12 @@ export function Login() {
           href="/api/auth/oauth/42/start"
           className="btn-arcade-primary w-full block text-center"
         >
-          &gt; SIGN IN WITH 42
+          &gt; {t('auth.signInWith42')}
         </a>
 
         {oauthErrorMessage && (
-          <p className="text-danger font-body text-base mb-4">
-            &gt; OAUTH: {oauthErrorMessage}
+          <p className="text-danger font-body text-base mt-4">
+            &gt; {t('auth.oauthError').toUpperCase()}: {oauthErrorMessage}
           </p>
         )}
 

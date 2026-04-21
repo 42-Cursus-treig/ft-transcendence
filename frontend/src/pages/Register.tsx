@@ -51,7 +51,7 @@ export function Register() {
           &gt; {t('auth.registerTitle')}
         </h1>
         <p className="font-body text-base text-muted mb-8">
-          NEW PLAYER REGISTRATION<span className="cursor-blink"></span>
+          {t('auth.registerTitle').toUpperCase()}<span className="cursor-blink"></span>
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6" noValidate>

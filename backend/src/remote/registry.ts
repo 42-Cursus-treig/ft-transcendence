@@ -90,7 +90,6 @@ class RemoteMatchRegistry {
     m.countdownHandle = null;
     m.graceHandle = null;
     setTimeout(() => this.remove(id), 30_000);
-    console.log(`[registry] Match ${id} aborted: ${reason}`);
   }
 
   size(): number {

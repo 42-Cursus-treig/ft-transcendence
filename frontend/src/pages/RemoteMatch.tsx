@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, Navigate, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthContext';
 import { useRemoteMatch } from '../game/pong/useRemoteMatch';
 import { useRemoteCanvas } from '../game/pong/useRemoteCanvas';
@@ -13,6 +14,7 @@ export function RemoteMatch() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   if (!id || !user) {
     return <Navigate to="/remote" replace />;
@@ -46,9 +48,7 @@ export function RemoteMatch() {
             if (joinErr.status === 409) {
               const existing = (joinErr.data as { matchId?: string }).matchId;
               if (existing && existing !== id) {
-                setDetailError(
-                  `You are already in another match. Leaving this one.`,
-                );
+                setDetailError(t('remote.inAnotherMatch'));
                 return;
               }
               setDetailError(joinErr.data.error);
@@ -56,11 +56,11 @@ export function RemoteMatch() {
             }
             setDetailError(joinErr.data.error);
           } else {
-            setDetailError('Could not join the match');
+            setDetailError(t('remote.couldNotJoin'));
           }
         }
       } catch {
-        if (!cancelled) setDetailError('Match not found or expired');
+        if (!cancelled) setDetailError(t('remote.matchNotFound'));
       }
     };
 
@@ -69,18 +69,18 @@ export function RemoteMatch() {
     return () => {
       cancelled = true;
     };
-  }, [id, user.username]);
+  }, [id, user.username, t]);
 
   if (detailError) {
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center">
-        <p className="font-display text-lg text-danger mb-4">&gt; ERROR</p>
+        <p className="font-display text-lg text-danger mb-4">&gt; {t('remote.errorTitle')}</p>
         <p className="font-body text-muted mb-6">{detailError}</p>
         <button
           onClick={() => navigate('/remote')}
           className="btn-arcade-primary"
         >
-          &gt; BACK TO LOBBY
+          &gt; {t('remote.backToLobby').toUpperCase()}
         </button>
       </div>
     );
@@ -89,7 +89,7 @@ export function RemoteMatch() {
   if (!initialDetail) {
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center">
-        <p className="font-body text-muted">&gt; Loading match…</p>
+        <p className="font-body text-muted">&gt; {t('remote.loading')}</p>
       </div>
     );
   }
@@ -107,6 +107,7 @@ function RemoteMatchInner({
   const navigate = useNavigate();
   const keys = useKeyLabels();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { t } = useTranslation();
 
   const remote = useRemoteMatch({ matchId });
 
@@ -153,16 +154,17 @@ function RemoteMatchInner({
   return (
     <div className="max-w-5xl mx-auto px-4 py-12">
       <h1 className="font-display text-2xl neon text-accent mb-2 text-center">
-        &gt; REMOTE PONG
+        &gt; {t('remote.matchTitle')}
       </h1>
       <p className="font-body text-base text-muted mb-2 text-center">
-        {leftAlias.toUpperCase()} VS {rightAlias.toUpperCase()}
+        {leftAlias.toUpperCase()} {t('pong.vs')} {rightAlias.toUpperCase()}
         <span className="cursor-blink"></span>
       </p>
       <p className="font-body text-sm text-muted text-center mb-8">
-        {initial.settings.ballSpeed} BALL · {initial.settings.paddleSize} PADDLES ·
-        {' '}FIRST TO {initial.settings.scoreToWin}
-        {initial.settings.powerUpsEnabled && ' · POWER-UPS'}
+        {t(`play.${initial.settings.ballSpeed.toLowerCase()}`)} {t('play.ballSpeed')} ·
+        {' '}{t(`play.${initial.settings.paddleSize.toLowerCase()}`)} {t('play.paddleSize')} ·
+        {' '}{t('pong.firstToWins', { score: initial.settings.scoreToWin })}
+        {initial.settings.powerUpsEnabled && ` · ${t('play.powerUps')}`}
       </p>
 
       <div className="relative">
@@ -178,17 +180,29 @@ function RemoteMatchInner({
             boxShadow: '0 0 20px rgba(57, 255, 20, 0.4), inset 0 0 30px rgba(57, 255, 20, 0.1)',
           }}
         />
-        <StatusOverlay remote={remote} />
+        <StatusOverlay remote={remote} t={t} />
       </div>
 
       <div className="mt-8 max-w-2xl mx-auto">
-        <ActionArea remote={remote} keys={keys} matchId={matchId} onBack={() => navigate('/remote')} />
+        <ActionArea
+          remote={remote}
+          keys={keys}
+          matchId={matchId}
+          onBack={() => navigate('/remote')}
+          t={t}
+        />
       </div>
     </div>
   );
 }
 
-function StatusOverlay({ remote }: { remote: ReturnType<typeof useRemoteMatch> }) {
+function StatusOverlay({
+  remote,
+  t,
+}: {
+  remote: ReturnType<typeof useRemoteMatch>;
+  t: (key: string, opts?: Record<string, unknown>) => string;
+}) {
   const { status, countdown, winner, finishReason, opponentConnected, side } = remote;
 
   if (status === 'playing' && opponentConnected) return null;
@@ -198,53 +212,52 @@ function StatusOverlay({ remote }: { remote: ReturnType<typeof useRemoteMatch> }
 
   switch (status) {
     case 'connecting':
-      main = 'CONNECTING…';
+      main = t('remote.connecting');
       break;
     case 'attaching':
-      main = 'JOINING MATCH…';
+      main = t('remote.joiningMatch');
       break;
     case 'waiting_opponent':
-      main = 'WAITING FOR OPPONENT';
-      sub = 'Share the URL or wait for someone to join';
+      main = t('remote.waitingForOpponentTitle');
+      sub = t('remote.waitingForOpponentSub');
       break;
     case 'waiting_ready':
       if (remote.iAmReady) {
-        main = 'WAITING FOR OPPONENT';
-        sub = 'You are ready — waiting for the other player';
+        main = t('remote.youAreReady');
+        sub = t('remote.waitingForOpponent');
       } else {
-        main = 'READY ?';
-        sub = 'Press SPACE when you are';
+        main = t('remote.ready');
+        sub = t('remote.pressSpace');
       }
       break;
     case 'opponent_ready':
       if (remote.iAmReady) {
-        // Cas rare : les deux sont ready presque simultanément, on va bientôt voir le countdown
-        main = 'STARTING…';
+        main = t('remote.starting');
       } else {
-        main = 'OPPONENT IS READY';
-        sub = 'Press SPACE to start';
+        main = t('remote.opponentIsReady');
+        sub = t('remote.pressSpaceToStart');
       }
       break;
     case 'countdown':
       main = countdown !== null ? String(countdown) : 'GO';
       break;
     case 'paused':
-      main = 'PAUSED';
-      sub = 'Opponent disconnected — 15s to return';
+      main = t('pong.paused');
+      sub = t('remote.opponentDisconnected');
       break;
     case 'finished': {
       const youWon = winner === side;
-      main = youWon ? 'YOU WIN' : 'YOU LOSE';
-      sub = finishReason === 'opponent_timeout' ? '(OPPONENT FORFEIT)' : '';
+      main = youWon ? t('remote.youWin') : t('remote.youLose');
+      sub = finishReason === 'opponent_timeout' ? t('remote.opponentForfeit') : '';
       break;
     }
     case 'aborted':
-      main = 'MATCH ABORTED';
+      main = t('remote.matchAborted');
       sub = finishReason ?? '';
       break;
     case 'disconnected':
-      main = 'DISCONNECTED';
-      sub = 'Lost connection to the server';
+      main = t('remote.disconnected');
+      sub = t('remote.lostConnection');
       break;
     default:
       return null;
@@ -265,11 +278,13 @@ function ActionArea({
   keys,
   matchId,
   onBack,
+  t,
 }: {
   remote: ReturnType<typeof useRemoteMatch>;
   keys: { leftUp: string; leftDown: string; rightUp: string; rightDown: string };
   matchId: string;
   onBack: () => void;
+  t: (key: string) => string;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -288,18 +303,18 @@ function ActionArea({
   if (remote.status === 'waiting_opponent') {
     return (
       <div className="arcade-panel text-center">
-        <p className="font-display text-xs text-accent-cyan mb-3">INVITE A FRIEND</p>
+        <p className="font-display text-xs text-accent-cyan mb-3">{t('remote.inviteFriend')}</p>
         <button onClick={copyLink} className="btn-arcade-primary">
-          {copied ? '> LINK COPIED' : '> COPY INVITE LINK'}
+          {copied ? `> ${t('remote.linkCopied')}` : `> ${t('remote.copyInviteLink')}`}
         </button>
         <p className="font-body text-sm text-muted mt-4">
-          Or wait for someone to join from the lobby.
+          {t('remote.waitingOrLobby')}
         </p>
         <button
           onClick={onBack}
           className="font-body text-base text-muted hover:text-accent uppercase mt-4 block mx-auto"
         >
-          &lt; back to lobby
+          &lt; {t('remote.backToLobby')}
         </button>
       </div>
     );
@@ -311,19 +326,21 @@ function ActionArea({
         {remote.iAmReady ? (
           <>
             <p className="font-display text-xs text-accent-cyan mb-4">
-              YOU ARE READY
+              {t('remote.youAreReady')}
             </p>
             <p className="font-body text-sm text-muted">
-              Waiting for {remote.status === 'opponent_ready' ? 'start…' : 'opponent…'}
+              {remote.status === 'opponent_ready'
+                ? t('remote.waitingForStart')
+                : t('remote.waitingForOpponent')}
             </p>
           </>
         ) : (
           <>
             <p className="font-display text-xs text-accent-cyan mb-4">
-              PRESS SPACE WHEN READY
+              {t('remote.readyWhen')}
             </p>
             <button onClick={remote.sendReady} className="btn-arcade-primary">
-              &gt; I&apos;M READY
+              &gt; {t('remote.iAmReady')}
             </button>
           </>
         )}
@@ -334,18 +351,18 @@ function ActionArea({
   if (remote.status === 'playing' || remote.status === 'countdown' || remote.status === 'paused') {
     return (
       <div className="arcade-panel text-center">
-        <p className="font-display text-xs text-accent-cyan mb-4">YOUR CONTROLS</p>
+        <p className="font-display text-xs text-accent-cyan mb-4">{t('remote.yourControls')}</p>
         <div className="flex justify-center gap-4 items-center">
           <span className="inline-flex items-center justify-center border-2 border-accent text-accent font-display"
             style={{ minWidth: '3rem', height: '3rem', padding: '0 0.75rem', fontSize: myUp.length > 1 ? '0.75rem' : '1rem' }}>
             {myUp}
           </span>
-          <span className="font-body text-muted">UP</span>
+          <span className="font-body text-muted">{t('pong.up')}</span>
           <span className="inline-flex items-center justify-center border-2 border-accent text-accent font-display ml-6"
             style={{ minWidth: '3rem', height: '3rem', padding: '0 0.75rem', fontSize: myDown.length > 1 ? '0.75rem' : '1rem' }}>
             {myDown}
           </span>
-          <span className="font-body text-muted">DOWN</span>
+          <span className="font-body text-muted">{t('pong.down')}</span>
         </div>
       </div>
     );
@@ -355,7 +372,7 @@ function ActionArea({
     return (
       <div className="text-center">
         <button onClick={onBack} className="btn-arcade-primary">
-          &gt; BACK TO LOBBY
+          &gt; {t('remote.backToLobby').toUpperCase()}
         </button>
       </div>
     );

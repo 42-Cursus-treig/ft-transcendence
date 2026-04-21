@@ -36,7 +36,7 @@ export function Home() {
             </>
           ) : (
             <>
-              <p className="mb-2 text-accent-cyan">&gt; INSERT COIN</p>
+              <p className="mb-2 text-accent-cyan">&gt; {t('home.insertCoin')}</p>
               <p className="text-muted">{t('home.ctaAnonymous')}</p>
             </>
           )}
@@ -47,10 +47,10 @@ export function Home() {
         {user ? (
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/play" className="btn-arcade-primary">
-              &gt; LOCAL / VS CPU
+              &gt; {t('home.playLocal')}
             </Link>
             <Link to="/remote" className="btn-arcade-primary">
-              &gt; ONLINE
+              &gt; {t('home.playOnline')}
             </Link>
           </div>
         ) : (

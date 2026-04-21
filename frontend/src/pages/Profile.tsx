@@ -32,7 +32,7 @@ export function Profile() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-16">
       <h1 className="font-display text-2xl neon text-accent mb-2">
-        &gt; PLAYER CARD
+        &gt; {t('profile.title').toUpperCase()}
       </h1>
       <p className="font-body text-base text-muted mb-8">
         {t('profile.title').toUpperCase()}<span className="cursor-blink"></span>
@@ -61,19 +61,19 @@ export function Profile() {
 
       <div className="mt-10">
         <h2 className="font-display text-lg neon text-accent mb-4">
-          &gt; MATCH HISTORY
+          &gt; {t('profile.matchHistory').toUpperCase()}
         </h2>
         {loading ? (
-          <p className="font-body text-muted">&gt; Loading…</p>
+          <p className="font-body text-muted">&gt; {t('common.loading')}</p>
         ) : matches && matches.length > 0 ? (
           <div className="space-y-2">
             {matches.map((m) => (
-              <MatchRow key={m.id} match={m} currentUserId={user.id} />
+              <MatchRow key={m.id} match={m} currentUserId={user.id} t={t} />
             ))}
           </div>
         ) : (
           <p className="font-body text-muted">
-            &gt; No matches yet. <span className="text-accent-cyan">Play your first game!</span>
+            &gt; {t('profile.noMatches')} <span className="text-accent-cyan">{t('profile.playFirstGame')}</span>
           </p>
         )}
       </div>
@@ -81,7 +81,15 @@ export function Profile() {
   );
 }
 
-function MatchRow({ match, currentUserId }: { match: MatchDTO; currentUserId: string }) {
+function MatchRow({
+  match,
+  currentUserId,
+  t,
+}: {
+  match: MatchDTO;
+  currentUserId: string;
+  t: (key: string) => string;
+}) {
   const left = match.participants.find((p) => p.side === 'LEFT')!;
   const right = match.participants.find((p) => p.side === 'RIGHT')!;
   const currentSide = left.userId === currentUserId ? 'LEFT' : 'RIGHT';
@@ -110,7 +118,7 @@ function MatchRow({ match, currentUserId }: { match: MatchDTO; currentUserId: st
           color: userWon ? '#39ff14' : '#ff2e63',
         }}
       >
-        {userWon ? 'WIN' : 'LOSS'}
+        {userWon ? t('profile.win') : t('profile.loss')}
       </span>
       <span className="text-text flex-1">
         {left.alias} <span className="text-accent">{left.score}</span>

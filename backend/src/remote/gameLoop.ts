@@ -69,10 +69,6 @@ function runTick(match: RemoteMatch): void {
     rightDown: match.guest?.input.down ?? false,
   };
 
-  if (now % 1000 < 20) {
-    console.log('[tick]', 'host input:', match.host.input, 'guest input:', match.guest?.input);
-  }
-
   const resolved = resolveSettings(match.settings);
   const prev = match.gameState;
   match.gameState = updateGame(prev, input, dt, resolved, now);
@@ -149,7 +145,6 @@ export function handlePlayerDisconnect(
       reason: 'opponent_timeout',
     });
 
-    // Persistance en BDD
     if (prismaClient) {
       const winnerSide = winner === 'left' ? 'LEFT' : 'RIGHT';
       persistRemoteMatch(prismaClient, match, winnerSide).catch((err) => {

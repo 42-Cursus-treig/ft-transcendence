@@ -1,6 +1,7 @@
 import { Link, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthContext';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 export function Layout() {
   const { user, logout } = useAuth();
@@ -14,6 +15,7 @@ export function Layout() {
             &gt; FT_TRANSCENDENCE
           </Link>
           <nav className="flex items-center gap-6 font-body text-lg">
+            <LanguageSwitcher />
             {user ? (
               <>
                 <Link to="/profile" className="hover:text-accent flex items-center gap-2">

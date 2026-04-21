@@ -228,12 +228,10 @@ export const remoteRoutes: FastifyPluginAsync = async (app) => {
           },
         }));
 
-        // Notifie l'autre joueur avec un snapshot complet du match
         const otherSide = attachedSide === 'LEFT' ? 'RIGHT' : 'LEFT';
         const otherPlayer = otherSide === 'LEFT' ? match.host : match.guest;
 
         if (otherPlayer?.socket) {
-          // L'autre joueur est connecté : on lui envoie la mise à jour
           remoteRegistry.sendToPlayer(match, otherSide, {
             type: 'opponent_joined',
             match: {
@@ -244,7 +242,6 @@ export const remoteRoutes: FastifyPluginAsync = async (app) => {
               guest: match.guest ? { username: match.guest.username } : null,
             },
           });
-          // Et on gère la reprise de partie si c'était une déconnexion en cours
           handlePlayerReconnect(match);
         }
 
@@ -269,7 +266,6 @@ export const remoteRoutes: FastifyPluginAsync = async (app) => {
         if (!player) return;
         player.ready = true;
 
-        // Accusé de réception pour l'émetteur
         socket.send(JSON.stringify({ type: 'ready_ack' }));
 
         if (
