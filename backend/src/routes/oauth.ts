@@ -25,10 +25,11 @@ export const oauthRoutes: FastifyPluginAsync = async (app) => {
   });
 
   app.get('/auth/oauth/42/callback', async (request, reply) => {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     const query = request.query as { code?: string; state?: string; error?: string };
 
     if (query.error) {
-      return reply.redirect('/login?oauth_error=denied');
+      return reply.redirect(`${frontendUrl}/login?oauth_error=denied`);
     }
 
     const code = query.code;
@@ -37,7 +38,7 @@ export const oauthRoutes: FastifyPluginAsync = async (app) => {
 
     if (!code || !receivedState || !expectedState || receivedState !== expectedState) {
       reply.clearCookie(OAUTH_STATE_COOKIE, { path: '/' });
-      return reply.redirect('/login?oauth_error=state_mismatch');
+      return reply.redirect(`${frontendUrl}/login?oauth_error=state_mismatch`);
     }
 
     reply.clearCookie(OAUTH_STATE_COOKIE, { path: '/' });
@@ -141,7 +142,15 @@ export const oauthRoutes: FastifyPluginAsync = async (app) => {
       });
 
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-      return reply.redirect(frontendUrl);
+      return reply.type('text/html').send(`
+        <html>
+          <body>
+            <script>
+              window.location.href = "${frontendUrl}";
+            </script>
+          </body>
+        </html>
+      `);
     } catch (err) {
       app.log.error({ err }, 'OAuth 42 callback failed');
       return reply.redirect('/login?oauth_error=server_error');
