@@ -28,8 +28,10 @@ export class RemoteSocket {
       return;
     }
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const url = `${protocol}//${window.location.host}/api/remote/ws`;
+    const wsBaseUrl = import.meta.env.VITE_WS_URL || 
+      (window.location.protocol === 'https:' ? `wss://${window.location.host}` : `ws://${window.location.host}`);
+    
+    const url = `${wsBaseUrl}/api/remote/ws`;
 
     this.manuallyClosed = false;
     const ws = new WebSocket(url);

@@ -9,8 +9,10 @@ export class ApiException extends Error {
   }
 }
 
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`/api${path}`, {
+  const response = await fetch(`${API_BASE}/api${path}`, {
     ...init,
     credentials: 'include',
     headers: {
