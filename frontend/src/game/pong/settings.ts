@@ -1,5 +1,3 @@
-import { PADDLE_WIDTH, PADDLE_MARGIN, GAME_WIDTH, GAME_HEIGHT } from "./constants";
-
 export type Theme = 'CLASSIC' | 'SYNTHWAVE' | 'MONO';
 
 export type GameSettings = {
