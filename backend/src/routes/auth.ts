@@ -79,7 +79,7 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
     reply.setCookie(SESSION_COOKIE_NAME, token, {
       httpOnly: true,
       secure: true,
-      sameSite: 'strict',
+      sameSite: 'none',
       path: '/',
       expires: session.expiresAt,
     });
@@ -87,7 +87,7 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
     reply.setCookie('has_session', '1', {
       httpOnly: false,
       secure: true,
-      sameSite: 'strict',
+      sameSite: 'none',
       path: '/',
       expires: session.expiresAt,
     });
@@ -109,8 +109,16 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
         .deleteMany({ where: { tokenHash: hashSessionToken(token) } })
         .catch(() => undefined);
     }
-    reply.clearCookie(SESSION_COOKIE_NAME, { path: '/' });
-    reply.clearCookie('has_session', { path: '/' });
+    reply.clearCookie(SESSION_COOKIE_NAME, {
+      path: '/',
+      sameSite: 'none',
+      secure: true
+    });
+    reply.clearCookie('has_session', { 
+      path: '/', 
+      sameSite: 'none', 
+      secure: true 
+    });
     return reply.send({ success: true });
   });
 
