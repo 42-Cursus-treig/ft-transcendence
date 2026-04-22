@@ -110,7 +110,7 @@ export function Login() {
         </div>
 
         <a
-          href="/api/auth/oauth/42/start"
+          href={`${import.meta.env.VITE_API_URL}/api/auth/oauth/42/start`}
           className="btn-arcade-primary w-full block text-center"
         >
           &gt; {t('auth.signInWith42')}
