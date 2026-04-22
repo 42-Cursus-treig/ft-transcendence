@@ -140,7 +140,8 @@ export const oauthRoutes: FastifyPluginAsync = async (app) => {
         expires: session.expiresAt,
       });
 
-      return reply.redirect('/');
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      return reply.redirect(frontendUrl);
     } catch (err) {
       app.log.error({ err }, 'OAuth 42 callback failed');
       return reply.redirect('/login?oauth_error=server_error');
