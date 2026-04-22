@@ -7,12 +7,14 @@ RUN apt-get update -y && \
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
-RUN npm install
+RUN npm ci
 
 COPY . .
 
 RUN npx prisma generate
 
+RUN npm run build
+
 EXPOSE 3000
 
-CMD ["sh", "-c", "npx prisma migrate deploy && npm run dev"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
