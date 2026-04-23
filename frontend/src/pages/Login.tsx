@@ -1,10 +1,9 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthContext';
 import { loginSchema } from '../utils/validation';
 import { ApiException } from '../api/client';
-import { useSearchParams } from 'react-router-dom';
 
 export function Login() {
   const { login } = useAuth();
@@ -55,16 +54,16 @@ export function Login() {
   };
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-16">
+    <div className="max-w-lg mx-auto px-4 py-8 sm:py-16">
       <div className="arcade-panel">
-        <h1 className="font-display text-xl neon text-accent mb-2">
+        <h1 className="font-display text-base sm:text-xl neon text-accent mb-2">
           &gt; {t('auth.loginTitle')}
         </h1>
-        <p className="font-body text-base text-muted mb-8">
+        <p className="font-body text-base text-muted mb-6 sm:mb-8">
           {t('auth.loginTitle').toUpperCase()}<span className="cursor-blink"></span>
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+        <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6" noValidate>
           <div>
             <label className="block font-display text-xs text-accent-cyan mb-2" htmlFor="email">
               {t('auth.email').toUpperCase()}
@@ -103,7 +102,7 @@ export function Login() {
           </button>
         </form>
 
-        <div className="flex items-center gap-3 my-6">
+        <div className="flex items-center gap-3 my-5 sm:my-6">
           <div className="flex-1 border-t border-border"></div>
           <span className="font-body text-sm text-muted">·</span>
           <div className="flex-1 border-t border-border"></div>
@@ -122,7 +121,7 @@ export function Login() {
           </p>
         )}
 
-        <p className="font-body text-base text-muted mt-6 text-center">
+        <p className="font-body text-base text-muted mt-5 sm:mt-6 text-center">
           {t('auth.noAccount')}{' '}
           <Link to="/register" className="arcade-link">
             {t('auth.registerLink')}

@@ -94,16 +94,16 @@ export function RemoteLobby() {
   if (!user) return null;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12">
-      <h1 className="font-display text-2xl neon text-accent mb-2">
+    <div className="max-w-3xl mx-auto px-4 py-8 sm:py-12">
+      <h1 className="font-display text-lg sm:text-2xl neon text-accent mb-2">
         &gt; {t('remote.lobbyTitle').toUpperCase()}
       </h1>
-      <p className="font-body text-base text-muted mb-8">
+      <p className="font-body text-base text-muted mb-6 sm:mb-8">
         {t('remote.lobbySubtitle').toUpperCase()}
         <span className="cursor-blink"></span>
       </p>
 
-      <div className="arcade-panel mb-8">
+      <div className="arcade-panel mb-6 sm:mb-8">
         <p className="font-display text-xs text-accent-cyan mb-3">{t('remote.hostAMatch')}</p>
         <p className="font-body text-base text-muted mb-4">
           {t('remote.hostSettingsHint')}
@@ -111,7 +111,7 @@ export function RemoteLobby() {
         <button
           onClick={handleCreate}
           disabled={creating}
-          className="btn-arcade-primary"
+          className="btn-arcade-primary w-full sm:w-auto"
         >
           {creating ? `> ${t('remote.creating')}` : `> ${t('remote.createMatch')}`}
         </button>
@@ -160,23 +160,25 @@ function MatchRow({
   t: (key: string, opts?: Record<string, unknown>) => string;
 }) {
   return (
-    <div className="border-2 border-border p-3 flex items-center gap-3 font-body">
-      <span className="text-accent font-display text-xs">
-        {match.hostUsername.toUpperCase()}
-      </span>
-      <span className="text-muted text-sm flex-1">
+    <div className="border-2 border-border p-3 font-body">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-accent font-display text-xs truncate">
+          {match.hostUsername.toUpperCase()}
+        </span>
+        <button
+          onClick={onJoin}
+          disabled={disabled}
+          className="btn-arcade-primary shrink-0 text-xs sm:text-sm"
+        >
+          {disabled ? `> ${t('remote.yourMatch')}` : `> ${t('remote.join')}`}
+        </button>
+      </div>
+      <p className="text-muted text-sm mt-2">
         {t(`play.${match.settings.ballSpeed.toLowerCase()}`)} ·
         {' '}{t(`play.${match.settings.paddleSize.toLowerCase()}`)} ·
         {' '}{t('pong.firstToWins', { score: match.settings.scoreToWin })}
         {match.settings.powerUpsEnabled && ` · ${t('play.powerUps')}`}
-      </span>
-      <button
-        onClick={onJoin}
-        disabled={disabled}
-        className="btn-arcade-primary"
-      >
-        {disabled ? `> ${t('remote.yourMatch')}` : `> ${t('remote.join')}`}
-      </button>
+      </p>
     </div>
   );
 }

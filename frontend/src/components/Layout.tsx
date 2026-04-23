@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthContext';
@@ -6,15 +7,20 @@ import { LanguageSwitcher } from './LanguageSwitcher';
 export function Layout() {
   const { user, logout } = useAuth();
   const { t } = useTranslation();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b-2 border-accent">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="font-display text-lg neon text-accent hover:text-accent-cyan transition-colors">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+          <Link
+            to="/"
+            className="font-display text-sm sm:text-base lg:text-lg neon text-accent hover:text-accent-cyan transition-colors shrink-0"
+          >
             &gt; FT_TRANSCENDENCE
           </Link>
-          <nav className="flex items-center gap-6 font-body text-lg">
+
+          <nav className="hidden sm:flex items-center gap-4 font-body text-lg">
             <LanguageSwitcher />
             {user ? (
               <>
@@ -26,24 +32,79 @@ export function Layout() {
                       className="w-8 h-8 rounded-full border border-accent"
                     />
                   )}
-                  <span>{user.username}</span>
+                  <span className="truncate max-w-[120px]">{user.username}</span>
                 </Link>
-                <button onClick={logout} className="text-muted hover:text-danger uppercase">
+                <button onClick={logout} className="text-muted hover:text-danger uppercase shrink-0">
                   {t('common.logout')}
                 </button>
               </>
             ) : (
               <>
-                <Link to="/login" className="text-muted hover:text-accent uppercase">
+                <Link to="/login" className="text-muted hover:text-accent uppercase shrink-0">
                   {t('common.login')}
                 </Link>
-                <Link to="/register" className="btn-arcade-primary">
+                <Link to="/register" className="btn-arcade-primary shrink-0">
                   {t('common.register')}
                 </Link>
               </>
             )}
           </nav>
+
+          <button
+            className="sm:hidden font-display text-accent text-xs border border-accent px-2 py-1 hover:bg-accent hover:text-bg transition-colors"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-label="Menu"
+          >
+            {menuOpen ? 'X' : '≡'}
+          </button>
         </div>
+
+        {menuOpen && (
+          <div className="sm:hidden border-t border-border bg-bg px-4 py-4 flex flex-col gap-4 font-body text-lg">
+            <LanguageSwitcher />
+            {user ? (
+              <>
+                <Link
+                  to="/profile"
+                  className="hover:text-accent flex items-center gap-2"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {user.avatarUrl && (
+                    <img
+                      src={user.avatarUrl}
+                      alt=""
+                      className="w-8 h-8 rounded-full border border-accent"
+                    />
+                  )}
+                  <span>{user.username}</span>
+                </Link>
+                <button
+                  onClick={() => { logout(); setMenuOpen(false); }}
+                  className="text-left text-muted hover:text-danger uppercase"
+                >
+                  {t('common.logout')}
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="text-muted hover:text-accent uppercase"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {t('common.login')}
+                </Link>
+                <Link
+                  to="/register"
+                  className="btn-arcade-primary text-center"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {t('common.register')}
+                </Link>
+              </>
+            )}
+          </div>
+        )}
       </header>
 
       <main className="flex-1">

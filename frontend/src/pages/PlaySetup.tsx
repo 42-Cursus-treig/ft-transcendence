@@ -70,12 +70,12 @@ export function PlaySetup() {
   };
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-16">
+    <div className="max-w-xl mx-auto px-4 py-8 sm:py-16">
       <div className="arcade-panel">
-        <h1 className="font-display text-xl neon text-accent mb-2">
+        <h1 className="font-display text-base sm:text-xl neon text-accent mb-2">
           &gt; {t('play.setupTitle').toUpperCase()}
         </h1>
-        <p className="font-body text-base text-muted mb-8">
+        <p className="font-body text-base text-muted mb-6 sm:mb-8">
           {t('play.chooseGame')}<span className="cursor-blink"></span>
         </p>
 
@@ -122,7 +122,7 @@ export function PlaySetup() {
             </>
           ) : (
             <SettingSection label={t('play.cpuDifficulty')}>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {(['EASY', 'NORMAL', 'HARD'] as const).map((d) => (
                   <ToggleButton
                     key={d}
@@ -142,21 +142,21 @@ export function PlaySetup() {
             </SettingSection>
           )}
 
-          <div className="border-t-2 border-border pt-6 flex items-center justify-between">
-            <h2 className="font-display text-sm text-accent-cyan">
+          <div className="border-t-2 border-border pt-6 flex items-center justify-between gap-2">
+            <h2 className="font-display text-xs sm:text-sm text-accent-cyan">
               &gt; {t('play.customization')}
             </h2>
             <button
               type="button"
               onClick={resetSettings}
-              className="font-body text-sm text-muted hover:text-accent uppercase"
+              className="font-body text-sm text-muted hover:text-accent uppercase shrink-0"
             >
               {t('play.resetDefaults')}
             </button>
           </div>
 
           <SettingSection label={t('play.ballSpeed')}>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {(['SLOW', 'NORMAL', 'FAST'] as const).map((v) => (
                 <ToggleButton
                   key={v}
@@ -170,7 +170,7 @@ export function PlaySetup() {
           </SettingSection>
 
           <SettingSection label={t('play.paddleSize')}>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {(['SMALL', 'NORMAL', 'LARGE'] as const).map((v) => (
                 <ToggleButton
                   key={v}
@@ -198,7 +198,7 @@ export function PlaySetup() {
           </SettingSection>
 
           <SettingSection label={t('play.theme')}>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {(['CLASSIC', 'SYNTHWAVE', 'MONO'] as const).map((v) => (
                 <ToggleButton
                   key={v}
@@ -268,7 +268,7 @@ function ToggleButton({
     <button
       type="button"
       onClick={onClick}
-      className={`btn-arcade ${
+      className={`btn-arcade w-full text-center ${
         active
           ? 'bg-accent text-bg border-accent'
           : 'bg-transparent text-accent border-accent'

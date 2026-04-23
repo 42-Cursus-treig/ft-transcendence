@@ -45,16 +45,16 @@ export function Register() {
   };
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-16">
+    <div className="max-w-lg mx-auto px-4 py-8 sm:py-16">
       <div className="arcade-panel">
-        <h1 className="font-display text-xl neon text-accent mb-2">
+        <h1 className="font-display text-base sm:text-xl neon text-accent mb-2">
           &gt; {t('auth.registerTitle')}
         </h1>
-        <p className="font-body text-base text-muted mb-8">
+        <p className="font-body text-base text-muted mb-6 sm:mb-8">
           {t('auth.registerTitle').toUpperCase()}<span className="cursor-blink"></span>
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+        <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6" noValidate>
           <div>
             <label className="block font-display text-xs text-accent-cyan mb-2" htmlFor="email">
               {t('auth.email').toUpperCase()}
@@ -108,7 +108,7 @@ export function Register() {
           </button>
         </form>
 
-        <p className="font-body text-base text-muted mt-6 text-center">
+        <p className="font-body text-base text-muted mt-5 sm:mt-6 text-center">
           {t('auth.hasAccount')}{' '}
           <Link to="/login" className="arcade-link">
             {t('auth.loginLink')}

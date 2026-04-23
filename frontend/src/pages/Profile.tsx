@@ -40,42 +40,27 @@ export function Profile() {
   if (!user) return null;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-16">
-      <h1 className="font-display text-2xl neon text-accent mb-2">
+    <div className="max-w-3xl mx-auto px-4 py-10 sm:py-16">
+      <h1 className="font-display text-xl sm:text-2xl neon text-accent mb-2">
         &gt; {t('profile.title').toUpperCase()}
       </h1>
       <p className="font-body text-base text-muted mb-8">
         {t('profile.title').toUpperCase()}<span className="cursor-blink"></span>
       </p>
 
-      <div className="arcade-panel font-body text-xl space-y-4">
-        <div className="flex gap-4">
-          <span className="text-accent-cyan w-48 uppercase font-display text-xs pt-1">
-            {t('profile.username')}
-          </span>
-          <span className="text-text">{user.username}</span>
-        </div>
-        <div className="flex gap-4">
-          <span className="text-accent-cyan w-48 uppercase font-display text-xs pt-1">
-            {t('profile.email')}
-          </span>
-          <span className="text-text">{user.email}</span>
-        </div>
-        <div className="flex gap-4">
-          <span className="text-accent-cyan w-48 uppercase font-display text-xs pt-1">
-            {t('profile.userId')}
-          </span>
-          <span className="text-muted text-sm break-all">{user.id}</span>
-        </div>
+      <div className="arcade-panel font-body text-lg sm:text-xl space-y-4">
+        <ProfileRow label={t('profile.username')} value={user.username} />
+        <ProfileRow label={t('profile.email')} value={user.email} />
+        <ProfileRow label={t('profile.userId')} value={user.id} small />
       </div>
 
       <div className="mt-10">
-        <div className="flex justify-between items-baseline mb-4">
-          <h2 className="font-display text-lg neon text-accent">
+        <div className="flex justify-between items-baseline mb-4 gap-2">
+          <h2 className="font-display text-base sm:text-lg neon text-accent">
             &gt; {t('profile.matchHistory').toUpperCase()}
           </h2>
           {pagination && pagination.total > 0 && (
-            <span className="font-body text-sm text-muted">
+            <span className="font-body text-sm text-muted shrink-0">
               {t('profile.matchCount', { count: pagination.total })}
             </span>
           )}
@@ -102,10 +87,32 @@ export function Profile() {
           </>
         ) : (
           <p className="font-body text-muted">
-            &gt; {t('profile.noMatches')} <span className="text-accent-cyan">{t('profile.playFirstGame')}</span>
+            &gt; {t('profile.noMatches')}{' '}
+            <span className="text-accent-cyan">{t('profile.playFirstGame')}</span>
           </p>
         )}
       </div>
+    </div>
+  );
+}
+
+function ProfileRow({
+  label,
+  value,
+  small,
+}: {
+  label: string;
+  value: string;
+  small?: boolean;
+}) {
+  return (
+    <div className="flex flex-col sm:flex-row sm:gap-4 gap-1">
+      <span className="text-accent-cyan sm:w-48 uppercase font-display text-xs shrink-0">
+        {label}
+      </span>
+      <span className={small ? 'text-muted text-sm break-all' : 'text-text break-all'}>
+        {value}
+      </span>
     </div>
   );
 }
@@ -125,11 +132,11 @@ function PaginationControls({
   const isLastPage = !pagination.hasMore;
 
   return (
-    <div className="mt-6 flex items-center justify-between font-body">
+    <div className="mt-6 flex items-center justify-between font-body gap-2">
       <button
         onClick={onPrev}
         disabled={isFirstPage}
-        className={`btn-arcade ${
+        className={`btn-arcade text-sm ${
           isFirstPage
             ? 'opacity-40 cursor-not-allowed border-muted text-muted'
             : 'border-accent text-accent hover:bg-accent hover:text-bg'
@@ -138,7 +145,7 @@ function PaginationControls({
         &lt; {t('common.previous')}
       </button>
 
-      <span className="font-display text-sm text-muted">
+      <span className="font-display text-xs text-muted text-center">
         {t('common.pageOfTotal', {
           current: pagination.page,
           total: pagination.totalPages,
@@ -148,7 +155,7 @@ function PaginationControls({
       <button
         onClick={onNext}
         disabled={isLastPage}
-        className={`btn-arcade ${
+        className={`btn-arcade text-sm ${
           isLastPage
             ? 'opacity-40 cursor-not-allowed border-muted text-muted'
             : 'border-accent text-accent hover:bg-accent hover:text-bg'
@@ -180,32 +187,38 @@ function MatchRow({
 
   const date = new Date(match.endedAt);
   const dateLabel = date.toLocaleDateString(undefined, {
-    year: 'numeric', month: '2-digit', day: '2-digit',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
   });
 
   return (
     <div
-      className="border-2 p-3 flex items-center gap-3 font-body"
+      className="border-2 p-3 font-body"
       style={{
         borderColor: userWon ? '#39ff14' : '#2a2a3a',
         boxShadow: userWon ? '0 0 8px rgba(57, 255, 20, 0.25)' : 'none',
       }}
     >
-      <span
-        className="font-display text-xs px-2 py-1"
-        style={{
-          color: userWon ? '#39ff14' : '#ff2e63',
-        }}
-      >
-        {userWon ? t('profile.win') : t('profile.loss')}
-      </span>
-      <span className="text-text flex-1">
-        {left.alias} <span className="text-accent">{left.score}</span>
-        {' — '}
-        <span className="text-accent">{right.score}</span> {right.alias}
-      </span>
-      <span className="text-muted text-sm">{durationLabel}</span>
-      <span className="text-muted text-sm">{dateLabel}</span>
+      <div className="flex items-center gap-3">
+        <span
+          className="font-display text-xs px-2 py-1 shrink-0"
+          style={{ color: userWon ? '#39ff14' : '#ff2e63' }}
+        >
+          {userWon ? t('profile.win') : t('profile.loss')}
+        </span>
+        <span className="text-text flex-1 text-sm sm:text-base truncate">
+          {left.alias}{' '}
+          <span className="text-accent">{left.score}</span>
+          {' — '}
+          <span className="text-accent">{right.score}</span>{' '}
+          {right.alias}
+        </span>
+      </div>
+      <div className="flex gap-4 mt-1 pl-2 font-body text-xs text-muted">
+        <span>{durationLabel}</span>
+        <span>{dateLabel}</span>
+      </div>
     </div>
   );
 }
