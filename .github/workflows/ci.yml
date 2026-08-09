@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    defaults:
+      run:
+        working-directory: backend
+
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npm run prisma:generate
+
+      - name: Build backend
+        run: npm run build
+
+  frontend:
+    name: Frontend
+    uses: 42-Cursus-treig/.github/.github/workflows/node-ci.yml@main
+    with:
+      node_version: "22"
+      working_directory: "frontend"
+      run_lint: false
+      run_tests: false
+      run_build: true
+
+  docker:
+    name: Docker Compose
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      HTTP_PORT: "8080"
+      HTTPS_PORT: "8443"
+      POSTGRES_USER: ci
+      POSTGRES_PASSWORD: ci-password
+      POSTGRES_DB: transcendence_ci
+      POSTGRES_PORT: "5432"
+      BACKEND_PORT: "3000"
+      DATABASE_URL: postgresql://ci:ci-password@postgres:5432/transcendence_ci
+      JWT_SECRET: ci-jwt-secret-with-at-least-32-characters
+      NODE_ENV: test
+      OAUTH_42_CLIENT_ID: ci-client-id
+      OAUTH_42_CLIENT_SECRET: ci-client-secret
+      OAUTH_42_REDIRECT_URI: https://localhost/api/auth/oauth/42/callback
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Compose configuration
+        run: docker compose config --quiet
